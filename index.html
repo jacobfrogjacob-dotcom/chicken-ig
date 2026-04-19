@@ -90,7 +90,9 @@
     .nav-item.active { color: var(--chinese-red); font-weight: bold; }
     .nav-icon { font-size: 24px; }
     .page { display: none; }
-    .page.active { display: block; }
+    .page.active, #loginPage { display: block; }
+    #appPage { display: none; }
+    #appPage.active { display: block; }
     .border-box {
       border: 3px solid var(--ink-black);
       position: relative;
@@ -146,13 +148,14 @@
   </style>
 </head>
 <body>
-  <div id="loginPage" class="page">
+  <div id="loginPage" class="page" style="display: block; min-height: 100vh;">
     <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;">
       <div class="border-box text-center">
         <h1 style="font-size: 36px; color: var(--chinese-red);">IG粉絲小程序</h1>
         <p style="font-size: 18px; margin: 20px 0;">書法風格抽卡系統</p>
-        <button class="btn" onclick="login()">使用 Google 帳號登入</button>
-        <p id="loginError" style="color: red; margin-top: 10px; display: none;"></p>
+        <button class="btn" id="loginBtn" onclick="login()">使用 Google 帳號登入</button>
+        <p id="loginError" style="color: red; margin-top: 10px;"></p>
+        <div id="debugInfo" style="font-size: 12px; color: blue;"></div>
       </div>
     </div>
   </div>
@@ -371,29 +374,17 @@
     const RARITY = { N: 60, R: 25, SSR: 12, LOG: 3 };
 
     async function login() {
+      // 使用 redirect 方式避免弹窗被阻挡
+      const provider = new firebase.auth.GoogleAuthProvider();
       try {
-        const provider = new firebase.auth.GoogleAuthProvider();
         await auth.signInWithRedirect(provider);
       } catch (error) {
         console.error('登入錯誤:', error);
-        const errEl = document.getElementById('loginError');
-        errEl.textContent = '登入失敗: ' + error.message;
-        errEl.style.display = 'block';
+        document.getElementById('loginError').textContent = '登入失败: ' + error.message;
       }
     }
 
-    async function checkRedirectResult() {
-      const result = await auth.getRedirectResult();
-      if (result.user) {
-        // 登入成功
-      }
-    }
-    checkRedirectResult();
-
-    async function logout() {
-      await auth.signOut();
-    }
-
+    // 检查是否已经登入
     auth.onAuthStateChanged(async (user) => {
       if (user) {
         currentUser = user;
@@ -414,13 +405,16 @@
           });
           userCoins = 0;
         }
-
         updateUserUI();
         loadData();
       } else {
         showPage('login');
       }
     });
+
+    async function logout() {
+      await auth.signOut();
+    }
 
     function updateUserUI() {
       document.getElementById('displayCoins').textContent = '💰 ' + userCoins;
@@ -437,6 +431,8 @@
 
     function showPage(page) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('appPage').classList.remove('active');
+      document.getElementById('loginPage').classList.remove('active');
       if (page === 'login') {
         document.getElementById('loginPage').classList.add('active');
       } else {
