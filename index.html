@@ -152,6 +152,7 @@
         <h1 style="font-size: 36px; color: var(--chinese-red);">IG粉絲小程序</h1>
         <p style="font-size: 18px; margin: 20px 0;">書法風格抽卡系統</p>
         <button class="btn" onclick="login()">使用 Google 帳號登入</button>
+        <p id="loginError" style="color: red; margin-top: 10px; display: none;"></p>
       </div>
     </div>
   </div>
@@ -370,9 +371,24 @@
     const RARITY = { N: 60, R: 25, SSR: 12, LOG: 3 };
 
     async function login() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      await auth.signInWithPopup(provider);
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await auth.signInWithRedirect(provider);
+      } catch (error) {
+        console.error('登入錯誤:', error);
+        const errEl = document.getElementById('loginError');
+        errEl.textContent = '登入失敗: ' + error.message;
+        errEl.style.display = 'block';
+      }
     }
+
+    async function checkRedirectResult() {
+      const result = await auth.getRedirectResult();
+      if (result.user) {
+        // 登入成功
+      }
+    }
+    checkRedirectResult();
 
     async function logout() {
       await auth.signOut();
