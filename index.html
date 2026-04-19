@@ -7,513 +7,171 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --ink-black: #1a1a1a;
-      --paper: #f4efe4;
-      --paper-dark: #e8e0d0;
-      --red-seal: #8B0000;
-      --gold: #B8860B;
-      --shadow: rgba(0,0,0,0.15);
-    }
+    :root { --red: #8B0000; --gold: #B8860B; --black: #1a1a1a; --paper: #f4efe4; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Noto Serif TC', serif; background: var(--paper); color: var(--black); padding-bottom: 70px; }
+
+    .btn-red { background: var(--red); color: white; border: 2px solid var(--black); padding: 14px; font-size: 16px; cursor: pointer; width: 100%; }
+    .btn-red:hover { background: var(--black); }
+    .btn-gold { background: var(--gold); color: white; border: 2px solid var(--black); padding: 10px; font-size: 14px; cursor: pointer; }
     
-    body {
-      font-family: 'Noto Serif TC', 'ZCOOL XiaoWei', serif;
-      background: var(--paper);
-      background-image: 
-        radial-gradient(circle at 20% 30%, rgba(139,0,0,0.03) 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, rgba(184,134,11,0.03) 0%, transparent 50%);
-      color: var(--ink-black);
-      min-height: 100vh;
-      padding-bottom: 70px;
-    }
-
-    /* 宣紙質感 */
-    .paper-texture {
-      background: var(--paper);
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-    }
-
-    /* 書法邊框 */
-    .calligraphy-frame {
-      border: 3px solid var(--ink-black);
-      position: relative;
-      background: white;
-    }
-    .calligraphy-frame::before {
-      content: '';
-      position: absolute;
-      inset: 5px;
-      border: 1px solid var(--ink-black);
-      pointer-events: none;
-    }
-    .calligraphy-frame::after {
-      content: '';
-      position: absolute;
-      inset: 8px;
-      border: 1px dashed rgba(0,0,0,0.2);
-      pointer-events: none;
-    }
-
-    /* 印章 */
-    .seal {
-      background: var(--red-seal);
-      color: white;
-      padding: 3px 8px;
-      font-size: 12px;
-      font-weight: bold;
-      border-radius: 2px;
-      display: inline-block;
-    }
-
-    /* 紅色印章風格按鈕 */
-    .btn-seal {
-      background: var(--red-seal);
-      color: white;
-      border: 2px solid var(--ink-black);
-      padding: 14px 28px;
-      font-size: 18px;
-      font-family: 'Noto Serif TC', serif;
-      cursor: pointer;
-      position: relative;
-      transition: all 0.3s ease;
-      box-shadow: 3px 3px 0 var(--ink-black);
-    }
-    .btn-seal:hover {
-      transform: translate(-2px, -2px);
-      box-shadow: 5px 5px 0 var(--ink-black);
-    }
-    .btn-seal:active {
-      transform: translate(2px, 2px);
-      box-shadow: 1px 1px 0 var(--ink-black);
-    }
-
-    .btn-gold {
-      background: var(--gold);
-      color: white;
-      border: 2px solid var(--ink-black);
-      padding: 12px 24px;
-      font-size: 16px;
-      font-family: 'Noto Serif TC', serif;
-      cursor: pointer;
-      box-shadow: 2px 2px 0 var(--ink-black);
-    }
-
-    /* 輸入框 */
-    .input-ink {
-      background: var(--paper);
-      border: 2px solid var(--ink-black);
-      padding: 14px;
-      font-size: 16px;
-      font-family: 'Noto Serif TC', serif;
-      width: 100%;
-    }
-    .input-ink:focus {
-      outline: none;
-      border-color: var(--red-seal);
-      box-shadow: 0 0 0 3px rgba(139,0,0,0.1);
-    }
-
-    /* 卡片 */
-    .card-ink {
-      background: white;
-      border: 2px solid var(--ink-black);
-      padding: 20px;
-      box-shadow: 4px 4px 0 var(--shadow);
-    }
-
-    /* 導航 */
-    .nav-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: white;
-      border-top: 3px solid var(--ink-black);
-      display: flex;
-      justify-content: space-around;
-      padding: 12px 0;
-      z-index: 100;
-    }
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      font-size: 11px;
-      color: #666;
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-    .nav-item.active {
-      color: var(--red-seal);
-      font-weight: bold;
-    }
-    .nav-icon {
-      font-size: 22px;
-      margin-bottom: 2px;
-    }
-
-    /* 區塊標題 */
-    .section-title {
-      font-size: 24px;
-      color: var(--red-seal);
-      border-bottom: 2px solid var(--red-seal);
-      padding-bottom: 8px;
-      margin-bottom: 15px;
-    }
-
-    /* 稀有度顏色 */
-    .rarity-N { color: #6b7280; border-color: #6b7280; }
-    .rarity-R { color: #2563eb; border-color: #2563eb; }
-    .rarity-SSR { color: #9333ea; border-color: #9333ea; }
-    .rarity-LOG { color: #d97706; border-color: #d97706; }
-
-    /* 登入頁面 */
-    #loginPage {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: 
-        linear-gradient(135deg, var(--paper) 0%, var(--paper-dark) 100%),
-        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM34 26v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM26 36v-4h-2v4H20v2h4v4h2v-4h4v-2H26zM36 26v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    }
-
-    /* 頁面切換 */
+    .input-field { background: var(--paper); border: 2px solid var(--black); padding: 12px; font-size: 16px; width: 100%; }
+    .input-field:focus { outline: none; border-color: var(--red); }
+    
+    .card { background: white; border: 2px solid var(--black); padding: 16px; }
+    .card-title { font-size: 20px; color: var(--red); border-bottom: 2px solid var(--red); padding-bottom: 8px; margin-bottom: 12px; }
+    
+    .nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 2px solid var(--black); display: flex; justify-content: space-around; padding: 10px 0; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: #666; cursor: pointer; }
+    .nav-item.active { color: var(--red); font-weight: bold; }
+    
     .page { display: none; }
     .page.active { display: block; }
-
-    /* 網格 */
-    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-
-    /* 間距 */
-    .p-4 { padding: 16px; }
-    .mb-3 { margin-bottom: 12px; }
-    .mt-3 { margin-top: 12px; }
-
-    /* 文字 */
-    .text-center { text-align: center; }
-    .text-red { color: var(--red-seal); }
-    .text-gold { color: var(--gold); }
-
-    /* 裝飾圖案 */
-    .decoration {
-      position: relative;
-    }
-    .decoration::before {
-      content: '❖';
-      position: absolute;
-      top: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: var(--red-seal);
-      font-size: 20px;
-      background: var(--paper);
-      padding: 0 10px;
-    }
-
-    /* Header */
-    .header {
-      background: var(--red-seal);
-      color: white;
-      padding: 14px 16px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .header h1 {
-      font-size: 18px;
-      font-weight: normal;
-    }
-    .coin-badge {
-      background: var(--gold);
-      color: white;
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 14px;
-    }
-
-    /* 抽卡動畫 */
-    @keyframes shake {
-      0%, 100% { transform: rotate(0deg); }
-      25% { transform: rotate(-5deg); }
-      75% { transform: rotate(5deg); }
-    }
-    .draw-animate {
-      animation: shake 0.5s ease-in-out infinite;
-    }
-
-    /* 聊天气泡 */
-    .chat-bubble {
-      max-width: 75%;
-      padding: 10px 14px;
-      border-radius: 18px;
-      margin: 6px 0;
-    }
-    .chat-sent {
-      background: var(--red-seal);
-      color: white;
-      margin-left: auto;
-      border-bottom-right-radius: 4px;
-    }
-    .chat-received {
-      background: white;
-      border: 1px solid var(--ink-black);
-      border-bottom-left-radius: 4px;
-    }
-
-    /* 加載動畫 */
-    .loading {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 2px solid var(--ink-black);
-      border-top-color: transparent;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* 裝飾邊框 */
-    .corner-decoration {
-      position: relative;
-    }
-    .corner-decoration::before {
-      content: '';
-      position: absolute;
-      top: 8px;
-      left: 8px;
-      right: 8px;
-      bottom: 8px;
-      border: 1px solid var(--ink-black);
-      pointer-events: none;
-    }
+    
+    .header { background: var(--red); color: white; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .coin { background: var(--gold); color: white; padding: 4px 10px; border-radius: 12px; font-size: 14px; }
+    
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center; }
+    
+    .rarity-N { color: #6b7280; }
+    .rarity-R { color: #2563eb; }
+    .rarity-SSR { color: #9333ea; }
+    .rarity-LOG { color: #d97706; }
+    
+    .seal { background: var(--red); color: white; padding: 2px 8px; font-size: 12px; }
+    
+    #appPage, #loginPage { display: none; }
   </style>
 </head>
 <body>
   <!-- 登入頁面 -->
-  <div id="loginPage" class="page active">
-    <div class="p-4" style="width: 100%; max-width: 400px;">
-      <div class="calligraphy-frame paper-texture p-4" style="text-align: center;">
-        <div style="font-size: 42px; color: var(--red-seal); margin-bottom: 10px;">☯</div>
-        <h1 style="font-size: 36px; color: var(--red-seal);">IG粉絲小程序</h1>
-        <p style="font-size: 16px; color: #666; margin: 20px 0; letter-spacing: 2px;">
-          書法風格抽卡系統
-        </p>
-        <div style="border-left: 3px solid var(--red-seal); margin: 30px 0; padding-left: 15px; text-align: left; font-size: 14px; color: #888;">
-          <p>✦ 每日免費抽卡</p>
-          <p>✦ 收藏稀有卡牌</p>
-          <p>✦ 加入粉絲團</p>
-        </div>
-        <button class="btn-seal" onclick="login()">開始體驗</button>
-        <p id="loginError" style="color: var(--red-seal); margin-top: 15px; display: none;"></p>
+  <div id="loginPage" class="page" style="display: none; min-height: 100vh; padding: 20px;">
+    <div style="max-width: 400px; margin: 0 auto; padding-top: 60px;">
+      <div class="card" style="text-align: center; border: 3px solid var(--black);">
+        <h1 style="font-size: 32px; color: var(--red); margin-bottom: 20px;">IG粉絲小程序</h1>
+        <p style="color: #666; margin-bottom: 30px;">請先登入開始使用</p>
+        <button class="btn-red" onclick="login()">Google 帳號登入</button>
       </div>
     </div>
   </div>
 
-  <!-- 主頁面 -->
-  <div id="appPage" class="page">
+  <!-- 主APP -->
+  <div id="appPage" class="page" style="display: none;">
     <div class="header">
       <h1>粉絲小程序</h1>
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <span class="coin-badge">💰 <span id="displayCoins">0</span></span>
-        <img id="userPhoto" style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid white;">
-        <button onclick="logout()" style="background: none; border: none; color: white; cursor: pointer; font-size: 14px;">登出</button>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <span class="coin">💰<span id="coins">0</span></span>
+        <button onclick="logout()" style="background: white; color: var(--red); border: none; cursor: pointer;">登出</button>
       </div>
     </div>
 
     <!-- 首頁 -->
-    <div id="homePage" class="active">
-      <div class="p-4">
-        <div class="calligraphy-frame paper-texture p-4 text-center mb-3">
-          <h2 style="font-size: 28px; color: var(--red-seal);">歡迎回來</h2>
-          <p style="font-size: 20px; margin: 10px 0;" id="welcomeName"></p>
-          <span id="adminBadge" class="seal" style="display: none;">管理員</span>
-        </div>
-
-        <!-- 公告 -->
-        <div class="card-ink mb-3">
-          <h3 class="section-title">📢 公告</h3>
-          <div id="announcementList">
-            <p style="color: #888;">載入中...</p>
-          </div>
-        </div>
-
-        <!-- 功能ICON -->
-        <div class="grid-2 mb-3">
-          <div class="card-ink text-center" onclick="showPage('cards')" style="cursor: pointer;">
-            <div style="font-size: 32px;">🎴</div>
-            <p style="font-size: 14px;">我的卡牌</p>
-          </div>
-          <div class="card-ink text-center" onclick="showPage('draw')" style="cursor: pointer;">
-            <div style="font-size: 32px;">🎰</div>
-            <p style="font-size: 14px;">抽卡</p>
-          </div>
-          <div class="card-ink text-center" onclick="showPage('submit')" style="cursor: pointer;">
-            <div style="font-size: 32px;">✍️</div>
-            <p style="font-size: 14px;">投稿</p>
-          </div>
-          <div class="card-ink text-center" onclick="showPage('admin')" style="cursor: pointer;">
-            <div style="font-size: 32px;">⚙️</div>
-            <p style="font-size: 14px;">管理</p>
-          </div>
-        </div>
+    <div id="home" class="active" style="padding: 16px;">
+      <div class="card" style="text-align: center; margin-bottom: 16px;">
+        <h2 style="color: var(--red);">歡迎回來</h2>
+        <p id="userName"></p>
+        <span id="adminTag" class="seal" style="display: none;">管理員</span>
+      </div>
+      <div class="card" style="margin-bottom: 16px;">
+        <h3 class="card-title">📢 公告</h3>
+        <div id="annList"></div>
+      </div>
+      <div class="grid-2">
+        <div class="card" style="cursor: pointer;" onclick="nav('cards')"><div style="font-size: 28px;">🎴</div><p>卡牌</p></div>
+        <div class="card" style="cursor: pointer;" onclick="nav('draw')"><div style="font-size: 28px;">🎰</div><p>抽卡</p></div>
+        <div class="card" style="cursor: pointer;" onclick="nav('submit')"><div style="font-size: 28px;">✍️</div><p>投稿</p></div>
+        <div class="card" style="cursor: pointer;" onclick="nav('admin')"><div style="font-size: 28px;">⚙️</div><p>管理</p></div>
       </div>
     </div>
 
     <!-- 客服 -->
-    <div id="servicePage" class="p-4">
-      <div class="card-ink">
-        <h3 class="section-title">📞 客服中心</h3>
-        <div id="serviceChat" style="height: 300px; overflow-y: auto; background: var(--paper); border: 2px solid var(--ink-black); padding: 10px; margin-bottom: 12px;">
-          <p style="color: #888; text-align: center;">尚無訊息</p>
-        </div>
-        <input type="text" id="serviceMsg" class="input-ink mb-3" placeholder="輸入訊息...">
-        <button class="btn-seal" onclick="sendServiceMsg()" style="width: 100%;">發送</button>
+    <div id="service" style="padding: 16px;">
+      <div class="card">
+        <h3 class="card-title">📞 客服</h3>
+        <div id="chatBox" style="height: 280px; overflow-y: auto; background: var(--paper); border: 1px solid var(--black); padding: 10px; margin-bottom: 12px;"></div>
+        <input id="msgInput" class="input-field" placeholder="訊息...">
+        <button class="btn-red" style="margin-top: 10px;" onclick="sendMsg()">發送</button>
       </div>
     </div>
 
     <!-- 社團 -->
-    <div id="communityPage" class="p-4">
-      <div class="card-ink">
-        <h3 class="section-title">👥 粉絲團</h3>
-        <button class="btn-seal mb-3" style="width: 100%;" onclick="showCreateCommunity()">
-          創建粉絲團 (500💰)
-        </button>
-        <div id="createCommunityForm" style="display: none;">
-          <input type="text" id="commName" class="input-ink mb-3" placeholder="社團名稱">
-          <input type="text" id="commDesc" class="input-ink mb-3" placeholder="社團描述">
-          <button class="btn-seal" onclick="createCommunity()" style="width: 100%;">確認創建</button>
-        </div>
-        <div id="communityList" class="mt-3"></div>
+    <div id="community" style="padding: 16px;">
+      <div class="card">
+        <h3 class="card-title">👥 粉絲團</h3>
+        <button class="btn-red" onclick="createComm()">創建 (500💰)</button>
       </div>
     </div>
 
     <!-- 商店 -->
-    <div id="shopPage" class="p-4">
-      <div class="card-ink">
-        <h3 class="section-title">🛒 商店</h3>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-          <button class="btn-seal flex-1" onclick="setShopTab('cards')" id="tabCards">卡牌</button>
-          <button class="btn-gold flex-1" onclick="setShopTab('packs')" id="tabPacks">卡包</button>
-        </div>
-        <div id="shopCards">
-          <p style="color: #888;">載入中...</p>
-        </div>
-        <div id="shopPacks" style="display: none;">
-          <div class="grid-2">
-            <div class="card-ink text-center">
-              <div style="font-size: 28px;">🎁</div>
-              <p class="text-gold">基礎包</p>
-              <button class="btn-gold mt-3" onclick="buyPack(100)">100💰</button>
-            </div>
-            <div class="card-ink text-center">
-              <div style="font-size: 28px;">🎁</div>
-              <p style="color: #2563eb;">稀有包</p>
-              <button class="btn-gold mt-3" onclick="buyPack(300)">300💰</button>
-            </div>
-            <div class="card-ink text-center">
-              <div style="font-size: 28px;">🎁</div>
-              <p style="color: #9333ea;">傳說包</p>
-              <button class="btn-gold mt-3" onclick="buyPack(1000)">1000💰</button>
-            </div>
-            <div class="card-ink text-center">
-              <div style="font-size: 28px;">🎁</div>
-              <p style="color: #d97706;">隱藏包</p>
-              <button class="btn-gold mt-3" onclick="buyPack(5000)">5000💰</button>
-            </div>
-          </div>
+    <div id="shop" style="padding: 16px;">
+      <div class="card">
+        <h3 class="card-title">🛒 商店</h3>
+        <div class="grid-2" style="margin-bottom: 12px;">
+          <button class="btn-gold" onclick="buyPack(100)">基礎包 100</button>
+          <button class="btn-gold" onclick="buyPack(300)">稀有包 300</button>
+          <button class="btn-gold" onclick="buyPack(1000)">傳說包 1000</button>
+          <button class="btn-gold" onclick="buyPack(5000)">隱藏包 5000</button>
         </div>
       </div>
     </div>
 
     <!-- 卡牌 -->
-    <div id="cardsPage" class="p-4">
-      <div class="card-ink">
-        <h3 class="section-title">🎴 我的卡牌</h3>
-        <p style="margin-bottom: 15px; color: #888;" id="cardCount">共 0 張</p>
-        <div id="myCards" class="grid-2">
-          <p style="color: #888;">載入中...</p>
-        </div>
+    <div id="cards" style="padding: 16px;">
+      <div class="card">
+        <h3 class="card-title">🎴 卡牌 <span id="cardCount"></span></h3>
+        <div id="cardGrid" class="grid-2"></div>
       </div>
     </div>
 
     <!-- 抽卡 -->
-    <div id="drawPage" class="p-4">
-      <div class="card-ink text-center mb-3">
-        <p>今日剩餘免費次數</p>
-        <p style="font-size: 32px; color: var(--red-seal);" id="freeDraws">1</p>
+    <div id="draw" style="padding: 16px;">
+      <div class="card" style="text-align: center; margin-bottom: 16px;">
+        <p>今日免費次數</p>
+        <p style="font-size: 28px; color: var(--red);" id="freeCount">1</p>
       </div>
-      <div id="drawResult" class="text-center" style="padding: 40px 0;">
-        <div style="font-size: 64px;">🎰</div>
+      <div id="drawResult" style="text-align: center; padding: 30px;">
+        <div style="font-size: 48px;">🎰</div>
       </div>
-      <button class="btn-seal" id="drawBtn" onclick="doDraw()" style="width: 100%;">免費抽卡</button>
-      <div class="card-ink mt-3">
-        <p style="text-align: center; margin-bottom: 10px;">稀有度機率</p>
-        <div class="grid-4" style="text-align: center;">
-          <div><span class="rarity-N" style="font-size: 18px;">普通</span><br><small>60%</small></div>
-          <div><span class="rarity-R" style="font-size: 18px;">稀有</span><br><small>25%</small></div>
-          <div><span class="rarity-SSR" style="font-size: 18px;">傳說</span><br><small>12%</small></div>
-          <div><span class="rarity-LOG" style="font-size: 18px;">隱藏</span><br><small>3%</small></div>
+      <button class="btn-red" onclick="doDraw()">免費抽卡</button>
+      <div class="card" style="margin-top: 16px;">
+        <div class="grid-4">
+          <div><span class="rarity-N">普通</span><br><small>60%</small></div>
+          <div><span class="rarity-R">���有</span><br><small>25%</small></div>
+          <div><span class="rarity-SSR">傳說</span><br><small>12%</small></div>
+          <div><span class="rarity-LOG">隱藏</span><br><small>3%</small></div>
         </div>
       </div>
     </div>
 
     <!-- 投稿 -->
-    <div id="submitPage" class="p-4">
-      <div class="card-ink">
-        <h3 class="section-title">✍️ 投稿系統</h3>
-        <p style="color: #888; margin-bottom: 15px;">投稿需經過管理員審核</p>
-        <textarea id="submitContent" class="input-ink mb-3" rows="4" placeholder="輸入投稿內容..."></textarea>
-        <input type="text" id="submitImage" class="input-ink mb-3" placeholder="圖片網址（可選）">
-        <button class="btn-seal" onclick="submitPost()" style="width: 100%;">提交投稿</button>
+    <div id="submit" style="padding: 16px;">
+      <div class="card">
+        <h3 class="card-title">✍️ 投稿</h3>
+        <textarea id="postContent" class="input-field" rows="4" placeholder="內容..."></textarea>
+        <input id="postImage" class="input-field" style="margin-top: 10px;" placeholder="圖片網址">
+        <button class="btn-red" style="margin-top: 10px;" onclick="submitPost()">提交</button>
       </div>
     </div>
 
-    <!-- 管理員 -->
-    <div id="adminPage" class="p-4">
-      <div class="card-ink">
-        <h3 class="section-title">⚙️ 管理員</h3>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-          <button class="btn-seal flex-1" onclick="setAdminTab('announcements')">公告</button>
-          <button class="btn-gold flex-1" onclick="setAdminTab('submissions')">投稿(<span id="pendingCount">0</span>)</button>
-        </div>
-        <div id="adminAnnouncements">
-          <input type="text" id="annTitle" class="input-ink mb-3" placeholder="公告標題">
-          <textarea id="annContent" class="input-ink mb-3" rows="3" placeholder="公告內容"></textarea>
-          <button class="btn-seal" onclick="createAnnouncement()" style="width: 100%;">發布公告</button>
-          <div id="annList" class="mt-3"></div>
-        </div>
-        <div id="adminSubmissions" style="display: none;"></div>
+    <!-- 管理 -->
+    <div id="admin" style="padding: 16px;">
+      <div class="card">
+        <h3 class="card-title">⚙️ 管理</h3>
+        <input id="annTitle" class="input-field" placeholder="標題">
+        <textarea id="annContent" class="input-field" style="margin-top: 10px;" rows="3" placeholder="內容"></textarea>
+        <button class="btn-red" style="margin-top: 10px;" onclick="postAnn()">發布公告</button>
+        <div id="subList" style="margin-top: 16px;"></div>
       </div>
     </div>
 
-    <!-- 導航 -->
-    <nav class="nav-bar">
-      <div class="nav-item active" onclick="showPage('home')" data-page="home">
-        <span class="nav-icon">🏠</span>
-        <span>首頁</span>
-      </div>
-      <div class="nav-item" onclick="showPage('service')" data-page="service">
-        <span class="nav-icon">📞</span>
-        <span>客服</span>
-      </div>
-      <div class="nav-item" onclick="showPage('community')" data-page="community">
-        <span class="nav-icon">����</span>
-        <span>社團</span>
-      </div>
-      <div class="nav-item" onclick="showPage('shop')" data-page="shop">
-        <span class="nav-icon">🛒</span>
-        <span>商店</span>
-      </div>
+    <nav class="nav">
+      <div class="nav-item active" onclick="nav('home')"><span style="font-size: 20px;">🏠</span><span>首頁</span></div>
+      <div class="nav-item" onclick="nav('service')"><span style="font-size: 20px;">📞</span><span>客服</span></div>
+      <div class="nav-item" onclick="nav('community')"><span style="font-size: 20px;">👥</span><span>社團</span></div>
+      <div class="nav-item" onclick="nav('shop')"><span style="font-size: 20px;">🛒</span><span>商店</span></div>
     </nav>
   </div>
 
@@ -531,36 +189,32 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    let currentUser = null;
-    let userCoins = 0;
+    let user = null;
+    let coins = 0;
     let isAdmin = false;
-    let lastDrawDate = null;
+    let lastDraw = null;
 
-    const CARDS_DATA = [
-      { id: '1', name: '小雞', rarity: 'N' },
-      { id: '2', name: '基礎', rarity: 'N' },
-      { id: '3', name: '進階', rarity: 'R' },
-      { id: '4', name: '稀有', rarity: 'R' },
-      { id: '5', name: '傳說', rarity: 'SSR' },
-      { id: '6', name: '英雄', rarity: 'SSR' },
-      { id: '7', name: '隱藏', rarity: 'LOG' },
-      { id: '8', name: '神秘', rarity: 'LOG' },
+    const CARDS = [
+      {id:'1',name:'小雞',rarity:'N'},{id:'2',name:'基礎',rarity:'N'},
+      {id:'3',name:'進階',rarity:'R'},{id:'4',name:'稀有',rarity:'R'},
+      {id:'5',name:'傳說',rarity:'SSR'},{id:'6',name:'英雄',rarity:'SSR'},
+      {id:'7',name:'隱藏',rarity:'LOG'},{id:'8',name:'神秘',rarity:'LOG'}
     ];
-    const RARITY = { N: 60, R: 25, SSR: 12, LOG: 3 };
+    const RARITY = {N:60,R:25,SSR:12,LOG:3};
 
-    let isLoggingIn = false;
+    function nav(page) {
+      document.querySelectorAll('#appPage > div').forEach(d => d.style.display = 'none');
+      document.getElementById(page).style.display = 'block';
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      event.target.closest('.nav-item')?.classList.add('active');
+    }
 
     async function login() {
-      if (isLoggingIn || currentUser) return;
-      isLoggingIn = true;
       const provider = new firebase.auth.GoogleAuthProvider();
       try {
         await auth.signInWithPopup(provider);
       } catch(e) {
-        console.error(e);
-        alert('錯誤: ' + e.message);
-      } finally {
-        isLoggingIn = false;
+        alert('請允許彈出視窗！');
       }
     }
 
@@ -568,209 +222,133 @@
       await auth.signOut();
     }
 
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        currentUser = user;
-        isAdmin = user.email === 'jacob.frog.jacob@gmail.com';
-        
-        const userDoc = await db.collection('users').doc(user.uid).get();
-        if (userDoc.exists) {
-          userCoins = userDoc.data().coins || 0;
-          lastDrawDate = userDoc.data().lastDrawDate;
-        } else {
-          await db.collection('users').doc(user.uid).set({
-            email: user.email, displayName: user.displayName, photoURL: user.photoURL, coins: 0, createdAt: new Date()
-          });
-          userCoins = 0;
-        }
-        updateUserUI();
-        loadData();
-        document.getElementById('loginPage').classList.remove('active');
-        document.getElementById('appPage').classList.add('active');
+    auth.onAuthStateChanged(async (u) => {
+      if (!u) {
+        document.getElementById('loginPage').style.display = 'block';
+        document.getElementById('appPage').style.display = 'none';
+        return;
       }
+      user = u;
+      isAdmin = u.email === 'jacob.frog.jacob@gmail.com';
+      
+      const doc = await db.collection('users').doc(u.uid).get();
+      if (doc.exists) {
+        coins = doc.data().coins || 0;
+        lastDraw = doc.data().lastDraw;
+      } else {
+        await db.collection('users').doc(u.uid).set({email:u.email,displayName:u.displayName,coins:0,createdAt:new Date()});
+        coins = 0;
+      }
+      
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('appPage').style.display = 'block';
+      updateUI();
+      loadData();
     });
 
-    function updateUserUI() {
-      document.getElementById('displayCoins').textContent = userCoins;
-      document.getElementById('welcomeName').textContent = currentUser?.displayName;
-      if (currentUser?.photoURL) {
-        const img = document.getElementById('userPhoto');
-        img.src = currentUser.photoURL;
-        img.style.display = 'block';
-      }
-      if (isAdmin) document.getElementById('adminBadge').style.display = 'inline-block';
-    }
-
-    function showPage(page) {
-      document.querySelectorAll('#appPage > div').forEach(d => d.style.display = 'none');
-      document.getElementById(page + 'Page').style.display = 'block';
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      document.querySelector(`.nav-item[data-page="${page}"]`).classList.add('active');
+    function updateUI() {
+      document.getElementById('coins').textContent = coins;
+      document.getElementById('userName').textContent = user?.displayName;
+      document.getElementById('adminTag').style.display = isAdmin ? 'inline-block' : 'none';
     }
 
     async function loadData() {
-      loadAnnouncements();
-      loadMyCards();
-      if (isAdmin) loadSubmissions();
-    }
-
-    async function loadAnnouncements() {
-      const snap = await db.collection('announcements').orderBy('createdAt', 'desc').limit(5).get();
-      const list = document.getElementById('announcementList');
-      if (snap.empty) {
-        list.innerHTML = '<p style="color: #888;">目前沒有公告</p>';
-      } else {
-        list.innerHTML = snap.docs.map(d => {
-          const data = d.data();
-          return `<div style="border-left: 3px solid var(--red-seal); padding-left: 12px; margin-bottom: 12px;">
-            <strong>${data.title}</strong>
-            <p style="font-size: 14px; color: #666;">${data.content}</p>
-          </div>`;
+      const snap = await db.collection('announcements').orderBy('createdAt','desc').limit(5).get();
+      document.getElementById('annList').innerHTML = snap.empty ? '<p style="color:#888;">無公告</p>' : 
+        snap.docs.map(d=>`<div style="border-left:3px solid var(--red);padding-left:10px;margin:8px 0;"><b>${d.data().title}</b><p style="font-size:14px;color:#666;">${d.data().content}</p></div>`).join('');
+      
+      const csnap = await db.collection('userCards').where('uid','==',user.uid).get();
+      document.getElementById('cardCount').textContent = `(${csnap.size}張)`;
+      document.getElementById('cardGrid').innerHTML = csnap.empty ? '<p style="grid-column:span 2;color:#888;">無卡牌</p>' :
+        csnap.docs.map(d=>{
+          const c = d.data();
+          return `<div class="card" style="text-align:center;padding:10px;"><img src="cards/${c.cardId}.png" style="width:100%;aspect-ratio:1;object-fit:contain;"><p class="rarity-${c.rarity}" style="font-weight:bold;">${c.name}</p></div>`;
         }).join('');
-      }
-    }
-
-    async function loadMyCards() {
-      const snap = await db.collection('userCards').where('uid', '==', currentUser.uid).get();
-      const list = document.getElementById('myCards');
-      document.getElementById('cardCount').textContent = '共 ' + snap.size + ' 張';
-      if (snap.empty) {
-        list.innerHTML = '<p style="grid-column: span 2; color: #888; text-align: center;">尚未獲得卡牌</p>';
-      } else {
-        list.innerHTML = snap.docs.map(d => {
-          const data = d.data();
-          const rarityClass = 'rarity-' + data.rarity;
-          return `<div class="card-ink" style="text-align: center;">
-            <img src="cards/${data.cardId || data.rarity}.png" style="width: 100%; aspect-ratio: 1; object-fit: contain;">
-            <p class="${rarityClass}" style="font-weight: bold;">${data.name}</p>
-          </div>`;
-        }).join('');
+      
+      document.getElementById('freeCount').textContent = (lastDraw === new Date().toLocaleDateString('zh-TW')) ? 0 : 1;
+      
+      if (isAdmin) {
+        const ssnap = await db.collection('submissions').where('status','==','pending').get();
+        document.getElementById('subList').innerHTML = ssnap.empty ? '<p>無投稿</p>' :
+          ssnap.docs.map(d=>`<div style="border:1px solid #ccc;padding:10px;margin:8px 0;"><b>${d.data().userName}</b><p>${d.data().content}</p><button class="btn-gold" onclick="approve('${d.id}')">通過</button></div>`).join('');
       }
     }
 
     async function doDraw() {
       const today = new Date().toLocaleDateString('zh-TW');
-      let freeDraws = (lastDrawDate === today) ? 0 : 1;
-      if (freeDraws === 0 && userCoins < 100) { alert('餘額不足！'); return; }
-      if (freeDraws > 0) {
-        await db.collection('users').doc(currentUser.uid).update({ lastDrawDate: today });
+      let free = (lastDraw === today) ? 0 : 1;
+      if (free === 0 && coins < 100) { alert('不足'); return; }
+      
+      if (free > 0) {
+        await db.collection('users').doc(user.uid).update({lastDraw:today});
       } else {
-        userCoins -= 100;
-        await db.collection('users').doc(currentUser.uid).update({ coins: userCoins });
+        coins -= 100;
+        await db.collection('users').doc(user.uid).update({coins:coins});
       }
-      document.getElementById('drawResult').innerHTML = '<div class="loading" style="margin: 40px auto;"></div>';
-      await new Promise(r => setTimeout(r, 1500));
-      const rand = Math.random() * 100;
-      let cumulative = 0, rarity = 'N';
-      for (const [r, p] of Object.entries(RARITY)) { cumulative += p; if (rand <= cumulative) { rarity = r; break; } }
-      const cards = CARDS_DATA.filter(c => c.rarity === rarity);
-      const card = cards[Math.floor(Math.random() * cards.length)] || CARDS_DATA[0];
-      await db.collection('userCards').add({ uid: currentUser.uid, cardId: card.id, name: card.name, rarity: card.rarity, obtainedAt: new Date() });
-      const rarityClass = 'rarity-' + rarity;
-      document.getElementById('drawResult').innerHTML = `<div style="text-align: center; padding: 20px;">
-        <div class="card-ink" style="display: inline-block; border-width: 4px; border-color: var(--${rarity === 'N' ? 'gray-400' : rarity === 'R' ? 'blue-400' : rarity === 'SSR' ? 'purple-400' : 'amber-400'});">
-          <img src="cards/${card.id}.png" style="width: 120px; height: 120px; object-fit: contain;">
-          <p class="${rarityClass}" style="font-size: 20px; font-weight: bold;">${card.name}</p>
-          <p class="${rarityClass}">${card.rarity === 'N' ? '普通' : card.rarity === 'R' ? '稀有' : card.rarity === 'SSR' ? '傳說' : '隱藏'}</p>
-        </div>
+      
+      document.getElementById('drawResult').innerHTML = '<div style="font-size:32px;">旋轉中...</div>';
+      await new Promise(r=>setTimeout(r,1500));
+      
+      let r = Math.random()*100, cum=0, rar='N';
+      for (const [k,v] of Object.entries(RARITY)) { cum+=v; if (r<=cum) {rar=k; break;} }
+      const c = CARDS.filter(x=>x.rarity===rar)[Math.floor(Math.random()*CARDS.filter(x=>x.rarity===rar).length)] || CARDS[0];
+      await db.collection('userCards').add({uid:user.uid,cardId:c.id,name:c.name,rarity:c.rarity,date:new Date()});
+      
+      document.getElementById('drawResult').innerHTML = `<div style="text-align:center;">
+        <img src="cards/${c.id}.png" style="width:120px;">
+        <p class="rarity-${rar}" style="font-size:18px;font-weight:bold;">${c.name}</p>
+        <p class="rarity-${rar}">${rar==='N'?'普通':rar==='R'?'稀有':rar==='SSR'?'傳說':'隱藏'}</p>
       </div>`;
-      updateUserUI();
-      loadMyCards();
+      updateUI();
+      loadData();
     }
 
     async function submitPost() {
-      const content = document.getElementById('submitContent').value;
-      const imageUrl = document.getElementById('submitImage').value;
-      if (!content.trim()) return;
-      await db.collection('submissions').add({ userId: currentUser.uid, userName: currentUser.displayName, content, imageUrl, status: 'pending', createdAt: new Date() });
-      alert('投稿成功！等待審核');
-      document.getElementById('submitContent').value = '';
-      document.getElementById('submitImage').value = '';
+      const con = document.getElementById('postContent').value;
+      const img = document.getElementById('postImage').value;
+      if (!con) return;
+      await db.collection('submissions').add({userId:user.uid,userName:user.displayName,content:con,imageUrl:img,status:'pending',createdAt:new Date()});
+      alert('成功');
+      document.getElementById('postContent').value = '';
     }
 
-    async function createAnnouncement() {
-      const title = document.getElementById('annTitle').value;
-      const content = document.getElementById('annContent').value;
-      if (!title.trim() || !content.trim()) return;
-      await db.collection('announcements').add({ title, content, createdAt: new Date() });
+    async function postAnn() {
+      const t = document.getElementById('annTitle').value;
+      const c = document.getElementById('annContent').value;
+      if (!t||!c) return;
+      await db.collection('announcements').add({title:t,content:c,createdAt:new Date()});
       document.getElementById('annTitle').value = '';
       document.getElementById('annContent').value = '';
-      loadAnnouncements();
-    }
-
-    async function loadSubmissions() {
-      const snap = await db.collection('submissions').where('status', '==', 'pending').get();
-      document.getElementById('pendingCount').textContent = snap.size;
-      const list = document.getElementById('adminSubmissions');
-      if (snap.empty) {
-        list.innerHTML = '<p style="color: #888;">沒有待審核的投稿</p>';
-      } else {
-        list.innerHTML = snap.docs.map(d => {
-          const data = d.data();
-          return `<div class="card-ink mb-3">
-            <p><strong>${data.userName}</strong></p>
-            <p>${data.content}</p>
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-              <button class="btn-seal" onclick="approveSubmission('${d.id}')">通過</button>
-              <button class="btn-gold" onclick="rejectSubmission('${d.id}')">拒絕</button>
-            </div>
-          </div>`;
-        }).join('');
-      }
-    }
-
-    async function approveSubmission(id) {
-      await db.collection('submissions').doc(id).update({ status: 'approved' });
-      loadSubmissions();
-    }
-
-    async function rejectSubmission(id) {
-      await db.collection('submissions').doc(id).update({ status: 'rejected' });
-      loadSubmissions();
-    }
-
-    function setAdminTab(tab) {
-      document.getElementById('adminAnnouncements').style.display = tab === 'announcements' ? 'block' : 'none';
-      document.getElementById('adminSubmissions').style.display = tab === 'submissions' ? 'block' : 'none';
-    }
-
-    function setShopTab(tab) {
-      document.getElementById('shopCards').style.display = tab === 'cards' ? 'block' : 'none';
-      document.getElementById('shopPacks').style.display = tab === 'packs' ? 'block' : 'none';
-      document.getElementById('tabCards').className = tab === 'cards' ? 'btn-seal flex-1' : 'btn-gold flex-1';
-      document.getElementById('tabPacks').className = tab === 'packs' ? 'btn-seal flex-1' : 'btn-gold flex-1';
+      loadData();
     }
 
     async function buyPack(price) {
-      if (userCoins < price) { alert('餘額不足！'); return; }
-      userCoins -= price;
-      await db.collection('users').doc(currentUser.uid).update({ coins: userCoins });
-      alert('購買成功！');
-      updateUserUI();
+      if (coins < price) { alert('不足'); return; }
+      coins -= price;
+      await db.collection('users').doc(user.uid).update({coins:coins});
+      alert('成功');
+      updateUI();
     }
 
-    function showCreateCommunity() {
-      const f = document.getElementById('createCommunityForm');
-      f.style.display = f.style.display === 'none' ? 'block' : 'none';
+    async function createComm() {
+      if (coins < 500) { alert('不足'); return; }
+      coins -= 500;
+      await db.collection('users').doc(user.uid).update({coins:coins});
+      alert('成功');
+      updateUI();
     }
 
-    async function createCommunity() {
-      const name = document.getElementById('commName').value;
-      if (userCoins < 500 || !name.trim()) return;
-      userCoins -= 500;
-      await db.collection('users').doc(currentUser.uid).update({ coins: userCoins });
-      await db.collection('communities').add({ name, ownerId: currentUser.uid, ownerName: currentUser.displayName, level: 1, members: [currentUser.uid], createdAt: new Date() });
-      document.getElementById('commName').value = '';
-      updateUserUI();
-      alert('創建成功！');
-    }
-
-    async function sendServiceMsg() {
-      const msg = document.getElementById('serviceMsg').value;
-      if (!msg.trim()) return;
-      await db.collection('serviceMessages').add({ userId: currentUser.uid, content: msg, createdAt: new Date() });
-      document.getElementById('serviceMsg').value = '';
+    async function sendMsg() {
+      const m = document.getElementById('msgInput').value;
+      if (!m) return;
+      await db.collection('service').add({uid:user.uid,msg:m,createdAt:new Date()});
+      document.getElementById('msgInput').value = '';
       alert('已發送');
+    }
+
+    async function approve(id) {
+      await db.collection('submissions').doc(id).update({status:'approved'});
+      loadData();
     }
   </script>
 </body>
