@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IG粉絲小程序</title>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --chinese-red: #8B0000;
+      --ink-black: #1a1a1a;
+      --paper: #f5f0e6;
+      --gold: #D4AF37;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Ma Shan Zheng', cursive, sans-serif;
+      background: var(--paper);
+      color: var(--ink-black);
+      padding-bottom: 80px;
+    }
+    .header {
+      background: var(--chinese-red);
+      color: white;
+      padding: 15px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 { font-size: 20px; }
+    .coins { background: var(--gold); color: var(--ink-black); padding: 5px 10px; border-radius: 5px; font-size: 14px; }
+    .main { padding: 15px; }
+    .btn {
+      background: var(--chinese-red);
+      color: white;
+      border: 2px solid var(--ink-black);
+      padding: 12px 24px;
+      font-size: 18px;
+      cursor: pointer;
+      width: 100%;
+      font-family: inherit;
+    }
+    .btn:hover { background: var(--ink-black); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .input {
+      background: var(--paper);
+      border: 2px solid var(--ink-black);
+      padding: 12px;
+      font-size: 16px;
+      width: 100%;
+      font-family: inherit;
+    }
+    .input:focus { outline: none; border-color: var(--chinese-red); }
+    .card {
+      background: white;
+      border: 2px solid var(--ink-black);
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top: 2px solid var(--ink-black);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 12px;
+      color: #666;
+      cursor: pointer;
+    }
+    .nav-item.active { color: var(--chinese-red); font-weight: bold; }
+    .nav-icon { font-size: 24px; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .border-box {
+      border: 3px solid var(--ink-black);
+      position: relative;
+      padding: 20px;
+      margin-bottom: 15px;
+      background: white;
+    }
+    .border-box::before {
+      content: '';
+      position: absolute;
+      inset: 4px;
+      border: 1px solid var(--ink-black);
+      pointer-events: none;
+    }
+    .rarity-N { color: #6b7280; }
+    .rarity-R { color: #3b82f6; }
+    .rarity-SSR { color: #a855f7; }
+    .rarity-LOG { color: #f59e0b; }
+    .seal {
+      background: var(--chinese-red);
+      color: white;
+      padding: 4px 8px;
+      font-size: 12px;
+      display: inline-block;
+    }
+    .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+    .tab {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid var(--ink-black);
+      text-align: center;
+      cursor: pointer;
+      background: white;
+    }
+    .tab.active { background: var(--chinese-red); color: white; }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid white; }
+    .message { padding: 10px; margin: 5px 0; border-radius: 10px; max-width: 80%; }
+    .message-sent { background: var(--chinese-red); color: white; margin-left: auto; }
+    .message-received { background: #eee; }
+    .chat-box {
+      height: 300px;
+      overflow-y: auto;
+      border: 2px solid var(--ink-black);
+      background: white;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .card-img { width: 100%; aspect-ratio: 1; object-fit: contain; }
+    .text-center { text-align: center; }
+    .mb-2 { margin-bottom: 10px; }
+    .mt-2 { margin-top: 10px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div id="loginPage" class="page">
+    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;">
+      <div class="border-box text-center">
+        <h1 style="font-size: 36px; color: var(--chinese-red);">IG粉絲小程序</h1>
+        <p style="font-size: 18px; margin: 20px 0;">書法風格抽卡系統</p>
+        <button class="btn" onclick="login()">使用 Google 帳號登入</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="appPage" class="page">
+    <div class="header">
+      <h1>IG粉絲小程序</h1>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="coins" id="displayCoins">💰 0</span>
+        <img id="userPhoto" class="avatar hidden">
+        <button onclick="logout()" style="background: white; color: var(--chinese-red); border: none; padding: 5px 10px; cursor: pointer;">登出</button>
+      </div>
+    </div>
+
+    <!-- 首頁 -->
+    <div id="homePage" class="main page active">
+      <div class="border-box text-center">
+        <h1 style="font-size: 30px; color: var(--chinese-red);">歡迎回來</h1>
+        <p id="welcomeName" style="font-size: 20px;"></p>
+        <span id="adminBadge" class="seal hidden">管理員</span>
+      </div>
+      
+      <div id="announcements" class="card">
+        <h2 style="font-size: 24px; color: var(--chinese-red); margin-bottom: 15px;">📢 公告</h2>
+        <div id="announcementList"></div>
+      </div>
+
+      <div class="card-grid">
+        <div class="card" onclick="showPage('cards')" style="cursor: pointer; text-align: center;">
+          <span style="font-size: 36px;">🎴</span>
+          <p>我的卡牌</p>
+        </div>
+        <div class="card" onclick="showPage('draw')" style="cursor: pointer; text-align: center;">
+          <span style="font-size: 36px;">🎰</span>
+          <p>抽卡</p>
+        </div>
+        <div class="card" onclick="showPage('submit')" style="cursor: pointer; text-align: center;">
+          <span style="font-size: 36px;">📝</span>
+          <p>投稿</p>
+        </div>
+        <div class="card" onclick="showPage('admin')" style="cursor: pointer; text-align: center;">
+          <span style="font-size: 36px;">⚙️</span>
+          <p>管理</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 客服 -->
+    <div id="servicePage" class="main page">
+      <div class="card">
+        <h2 style="font-size: 24px; color: var(--chinese-red);">📞 客服中心</h2>
+        <p style="margin: 10px 0;">有問題可以私訊管理員</p>
+        <div class="chat-box" id="serviceChat"></div>
+        <input type="text" id="serviceMsg" class="input mb-2" placeholder="輸入訊息...">
+        <button class="btn" onclick="sendServiceMsg()">發送</button>
+      </div>
+    </div>
+
+    <!-- 社團 -->
+    <div id="communityPage" class="main page">
+      <div class="card">
+        <h2 style="font-size: 24px; color: var(--chinese-red);">👥 粉絲團</h2>
+        <button class="btn mb-2" onclick="showCreateCommunity()">創建粉絲團 (500💰)</button>
+        <div id="createCommunityForm" class="hidden">
+          <input type="text" id="commName" class="input mb-2" placeholder="社團名稱">
+          <input type="text" id="commDesc" class="input mb-2" placeholder="社團描述">
+          <button class="btn" onclick="createCommunity()">確認創建</button>
+        </div>
+        <div id="communityList" style="margin-top: 15px;"></div>
+      </div>
+    </div>
+
+    <!-- 商店 -->
+    <div id="shopPage" class="main page">
+      <div class="card">
+        <h2 style="font-size: 24px; color: var(--chinese-red);">🛒 商店</h2>
+        <div class="tabs">
+          <div class="tab active" onclick="setShopTab('cards')">購買卡牌</div>
+          <div class="tab" onclick="setShopTab('packs')">購買卡包</div>
+        </div>
+        <div id="shopCards"></div>
+        <div id="shopPacks" class="hidden">
+          <div class="card-grid">
+            <div class="card text-center">
+              <span style="font-size: 36px;">🎁</span>
+              <p>基礎包</p>
+              <button class="btn mt-2" onclick="buyPack(100)">100💰</button>
+            </div>
+            <div class="card text-center">
+              <span style="font-size: 36px;">🎁</span>
+              <p>稀有包</p>
+              <button class="btn mt-2" onclick="buyPack(300)">300💰</button>
+            </div>
+            <div class="card text-center">
+              <span style="font-size: 36px;">🎁</span>
+              <p>傳說包</p>
+              <button class="btn mt-2" onclick="buyPack(1000)">1000💰</button>
+            </div>
+            <div class="card text-center">
+              <span style="font-size: 36px;">🎁</span>
+              <p>隱藏包</p>
+              <button class="btn mt-2" onclick="buyPack(5000)">5000💰</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 卡牌 -->
+    <div id="cardsPage" class="main page">
+      <div class="card">
+        <h2 style="font-size: 24px; color: var(--chinese-red);">🎴 我的卡牌</h2>
+        <div id="myCards" class="card-grid"></div>
+      </div>
+    </div>
+
+    <!-- 抽卡 -->
+    <div id="drawPage" class="main page">
+      <div class="card text-center">
+        <p>今日剩餘免費抽卡: <span id="freeDraws" style="color: var(--chinese-red); font-weight: bold;">1</span></p>
+      </div>
+      <div id="drawResult" class="text-center" style="padding: 40px;">
+        <span style="font-size: 60px;">🎰</span>
+      </div>
+      <button class="btn" id="drawBtn" onclick="doDraw()">免費抽卡</button>
+      <div class="card" style="margin-top: 15px;">
+        <h3>卡牌稀有度</h3>
+        <div style="display: flex; justify-content: space-around; padding: 10px 0;">
+          <div><span class="rarity-N" style="font-size: 20px;">普通</span><br><small>60%</small></div>
+          <div><span class="rarity-R" style="font-size: 20px;">稀有</span><br><small>25%</small></div>
+          <div><span class="rarity-SSR" style="font-size: 20px;">傳說</span><br><small>12%</small></div>
+          <div><span class="rarity-LOG" style="font-size: 20px;">隱藏</span><br><small>3%</small></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 投稿 -->
+    <div id="submitPage" class="main page">
+      <div class="card">
+        <h2 style="font-size: 24px; color: var(--chinese-red);">📝 投稿系統</h2>
+        <p style="margin: 10px 0;">投稿需要經過管理員審核</p>
+        <textarea id="submitContent" class="input mb-2" rows="4" placeholder="輸入投稿內容..."></textarea>
+        <input type="text" id="submitImage" class="input mb-2" placeholder="圖片網址（可選）">
+        <button class="btn" onclick="submitPost()">提交投稿</button>
+      </div>
+    </div>
+
+    <!-- 管理員 -->
+    <div id="adminPage" class="main page">
+      <div class="card">
+        <h2 style="font-size: 24px; color: var(--chinese-red);">⚙️ 管理員系統</h2>
+        <div class="tabs">
+          <div class="tab active" onclick="setAdminTab('announcements')">📢 公告</div>
+          <div class="tab" onclick="setAdminTab('submissions')">📝 投稿(<span id="pendingCount">0</span>)</div>
+        </div>
+        <div id="adminAnnouncements">
+          <input type="text" id="annTitle" class="input mb-2" placeholder="公告標題">
+          <textarea id="annContent" class="input mb-2" rows="3" placeholder="公告內容"></textarea>
+          <button class="btn mb-2" onclick="createAnnouncement()">發布公告</button>
+          <div id="annList"></div>
+        </div>
+        <div id="adminSubmissions" class="hidden"></div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-item active" onclick="showPage('home')">
+        <span class="nav-icon">🏠</span>
+        <span>首頁</span>
+      </div>
+      <div class="nav-item" onclick="showPage('service')">
+        <span class="nav-icon">📞</span>
+        <span>客服</span>
+      </div>
+      <div class="nav-item" onclick="showPage('community')">
+        <span class="nav-icon">👥</span>
+        <span>社團</span>
+      </div>
+      <div class="nav-item" onclick="showPage('shop')">
+        <span class="nav-icon">🛒</span>
+        <span>商店</span>
+      </div>
+    </nav>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyC_gBRP1HaiEgWXML5_HOGDcukElEBCKes",
+      authDomain: "ig-chicken.firebaseapp.com",
+      projectId: "ig-chicken",
+      storageBucket: "ig-chicken.firebasestorage.app",
+      messagingSenderId: "336000604442",
+      appId: "1:336000604442:web:25da73c459e1a5d86ab4a3"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let currentUser = null;
+    let userCoins = 0;
+    let isAdmin = false;
+    let lastDrawDate = null;
+
+    const CARDS_DATA = [
+      { id: '1', name: '小雞', rarity: 'N' },
+      { id: '2', name: '基礎', rarity: 'N' },
+      { id: '3', name: '進階', rarity: 'R' },
+      { id: '4', name: '稀有', rarity: 'R' },
+      { id: '5', name: '傳說', rarity: 'SSR' },
+      { id: '6', name: '英雄', rarity: 'SSR' },
+      { id: '7', name: '隱藏', rarity: 'LOG' },
+      { id: '8', name: '神秘', rarity: 'LOG' },
+    ];
+
+    const RARITY = { N: 60, R: 25, SSR: 12, LOG: 3 };
+
+    async function login() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      await auth.signInWithPopup(provider);
+    }
+
+    async function logout() {
+      await auth.signOut();
+    }
+
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        currentUser = user;
+        const email = user.email;
+        isAdmin = email === 'jacob.frog.jacob@gmail.com';
+        
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+          userCoins = userDoc.data().coins || 0;
+          lastDrawDate = userDoc.data().lastDrawDate;
+        } else {
+          await db.collection('users').doc(user.uid).set({
+            email: user.email,
+            displayName: user.displayName,
+            photoURL: user.photoURL,
+            coins: 0,
+            createdAt: new Date()
+          });
+          userCoins = 0;
+        }
+
+        updateUserUI();
+        loadData();
+      } else {
+        showPage('login');
+      }
+    });
+
+    function updateUserUI() {
+      document.getElementById('displayCoins').textContent = '💰 ' + userCoins;
+      document.getElementById('welcomeName').textContent = currentUser?.displayName;
+      if (currentUser?.photoURL) {
+        const img = document.getElementById('userPhoto');
+        img.src = currentUser.photoURL;
+        img.classList.remove('hidden');
+      }
+      if (isAdmin) {
+        document.getElementById('adminBadge').classList.remove('hidden');
+      }
+    }
+
+    function showPage(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      if (page === 'login') {
+        document.getElementById('loginPage').classList.add('active');
+      } else {
+        document.getElementById('appPage').classList.add('active');
+        document.getElementById(page + 'Page').classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        const navIndex = ['home', 'service', 'community', 'shop'].indexOf(page);
+        if (navIndex >= 0) {
+          document.querySelectorAll('.nav-item')[navIndex].classList.add('active');
+        }
+      }
+    }
+
+    async function loadData() {
+      loadAnnouncements();
+      loadMyCards();
+      if (isAdmin) {
+        loadSubmissions();
+      }
+    }
+
+    async function loadAnnouncements() {
+      const snap = await db.collection('announcements').orderBy('createdAt', 'desc').limit(5).get();
+      const list = document.getElementById('announcementList');
+      list.innerHTML = '';
+      snap.forEach(doc => {
+        const data = doc.data();
+        list.innerHTML += `<div style="border-left: 3px solid var(--chinese-red); padding-left: 10px; margin-bottom: 10px;">
+          <strong>${data.title}</strong>
+          <p style="font-size: 14px; color: #666;">${data.content}</p>
+        </div>`;
+      });
+    }
+
+    async function loadMyCards() {
+      const snap = await db.collection('userCards').where('uid', '==', currentUser.uid).get();
+      const list = document.getElementById('myCards');
+      list.innerHTML = '';
+      snap.forEach(doc => {
+        const data = doc.data();
+        const rarityClass = 'rarity-' + data.rarity;
+        list.innerHTML += `<div class="card">
+          <img src="/cards/${data.cardId || data.rarity}.png" class="card-img">
+          <p class="${rarityClass}" style="font-weight: bold; text-align: center;">${data.name}</p>
+        </div>`;
+      });
+    }
+
+    async function doDraw() {
+      const today = new Date().toLocaleDateString('zh-TW');
+      let freeDraws = (lastDrawDate === today) ? 0 : 1;
+
+      if (freeDraws === 0 && userCoins < 100) {
+        alert('餘額不足！');
+        return;
+      }
+
+      if (freeDraws > 0) {
+        freeDraws--;
+        await db.collection('users').doc(currentUser.uid).update({ lastDrawDate: today });
+      } else {
+        userCoins -= 100;
+        await db.collection('users').doc(currentUser.uid).update({ coins: userCoins });
+      }
+
+      const rand = Math.random() * 100;
+      let cumulative = 0;
+      let rarity = 'N';
+      for (const [r, p] of Object.entries(RARITY)) {
+        cumulative += p;
+        if (rand <= cumulative) { rarity = r; break; }
+      }
+
+      const cards = CARDS_DATA.filter(c => c.rarity === rarity);
+      const card = cards[Math.floor(Math.random() * cards.length)] || CARDS_DATA[0];
+
+      await db.collection('userCards').add({
+        uid: currentUser.uid,
+        cardId: card.id,
+        name: card.name,
+        rarity: card.rarity,
+        obtainedAt: new Date()
+      });
+
+      const rarityClass = 'rarity-' + rarity;
+      document.getElementById('drawResult').innerHTML = `
+        <div style="border: 4px solid; padding: 20px; display: inline-block; border-color: var(--${rarity === 'N' ? 'gray-400' : rarity === 'R' ? 'blue-400' : rarity === 'SSR' ? 'purple-400' : 'yellow-400'});">
+          <img src="/cards/${card.id}.png" style="width: 150px; height: 150px; object-fit: contain;">
+          <p class="${rarityClass}" style="font-size: 20px; font-weight: bold; text-align: center;">${card.name}</p>
+          <p class="${rarityClass}" style="text-align: center;">${rarity === 'N' ? '普通' : rarity === 'R' ? '稀有' : rarity === 'SSR' ? '傳說' : '隱藏'}</p>
+        </div>
+      `;
+
+      updateUserUI();
+      loadMyCards();
+    }
+
+    async function submitPost() {
+      const content = document.getElementById('submitContent').value;
+      const imageUrl = document.getElementById('submitImage').value;
+      if (!content.trim()) return;
+
+      await db.collection('submissions').add({
+        userId: currentUser.uid,
+        userName: currentUser.displayName,
+        content: content,
+        imageUrl: imageUrl,
+        status: 'pending',
+        createdAt: new Date()
+      });
+
+      alert('投稿成功！等待審核');
+      document.getElementById('submitContent').value = '';
+      document.getElementById('submitImage').value = '';
+    }
+
+    async function createAnnouncement() {
+      const title = document.getElementById('annTitle').value;
+      const content = document.getElementById('annContent').value;
+      if (!title.trim() || !content.trim()) return;
+
+      await db.collection('announcements').add({
+        title: title,
+        content: content,
+        createdAt: new Date()
+      });
+
+      document.getElementById('annTitle').value = '';
+      document.getElementById('annContent').value = '';
+      loadAnnouncements();
+    }
+
+    async function loadSubmissions() {
+      const snap = await db.collection('submissions').where('status', '==', 'pending').get();
+      const list = document.getElementById('adminSubmissions');
+      document.getElementById('pendingCount').textContent = snap.size;
+      list.innerHTML = '';
+      snap.forEach(doc => {
+        const data = doc.data();
+        list.innerHTML += `<div class="card">
+          <p><strong>${data.userName}</strong></p>
+          <p>${data.content}</p>
+          ${data.imageUrl ? `<img src="${data.imageUrl}" style="width: 100%; max-height: 200px; object-fit: contain;">` : ''}
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="btn" onclick="approveSubmission('${doc.id}')">✅ 通過</button>
+            <button class="btn" onclick="rejectSubmission('${doc.id}')">❌ 拒絕</button>
+          </div>
+        </div>`;
+      });
+    }
+
+    async function approveSubmission(id) {
+      await db.collection('submissions').doc(id).update({ status: 'approved' });
+      loadSubmissions();
+    }
+
+    async function rejectSubmission(id) {
+      await db.collection('submissions').doc(id).update({ status: 'rejected' });
+      loadSubmissions();
+    }
+
+    function setAdminTab(tab) {
+      document.querySelectorAll('#adminPage .tabs .tab').forEach(t => t.classList.remove('active'));
+      event.target.closest('.tab').classList.add('active');
+      if (tab === 'announcements') {
+        document.getElementById('adminAnnouncements').classList.remove('hidden');
+        document.getElementById('adminSubmissions').classList.add('hidden');
+      } else {
+        document.getElementById('adminAnnouncements').classList.add('hidden');
+        document.getElementById('adminSubmissions').classList.remove('hidden');
+      }
+    }
+
+    function setShopTab(tab) {
+      document.querySelectorAll('#shopPage .tabs .tab').forEach(t => t.classList.remove('active'));
+      event.target.closest('.tab').classList.add('active');
+      if (tab === 'cards') {
+        document.getElementById('shopCards').classList.remove('hidden');
+        document.getElementById('shopPacks').classList.add('hidden');
+      } else {
+        document.getElementById('shopCards').classList.add('hidden');
+        document.getElementById('shopPacks').classList.remove('hidden');
+      }
+    }
+
+    async function buyPack(price) {
+      if (userCoins < price) {
+        alert('餘額不足！');
+        return;
+      }
+      userCoins -= price;
+      await db.collection('users').doc(currentUser.uid).update({ coins: userCoins });
+      updateUserUI();
+      alert('購買成功！');
+    }
+
+    function showCreateCommunity() {
+      document.getElementById('createCommunityForm').classList.toggle('hidden');
+    }
+
+    async function createCommunity() {
+      const name = document.getElementById('commName').value;
+      const desc = document.getElementById('commDesc').value;
+      if (userCoins < 500 || !name.trim()) return;
+      
+      userCoins -= 500;
+      await db.collection('users').doc(currentUser.uid).update({ coins: userCoins });
+      await db.collection('communities').add({
+        name: name,
+        description: desc,
+        ownerId: currentUser.uid,
+        ownerName: currentUser.displayName,
+        level: 1,
+        members: [currentUser.uid],
+        createdAt: new Date()
+      });
+      
+      document.getElementById('commName').value = '';
+      document.getElementById('commDesc').value = '';
+      updateUserUI();
+      alert('創建成功！');
+    }
+
+    async function sendServiceMsg() {
+      const msg = document.getElementById('serviceMsg').value;
+      if (!msg.trim()) return;
+      
+      await db.collection('serviceMessages').add({
+        userId: currentUser.uid,
+        content: msg,
+        createdAt: new Date()
+      });
+      
+      document.getElementById('serviceMsg').value = '';
+      alert('已發送');
+    }
+  </script>
+</body>
+</html>
