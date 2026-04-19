@@ -10,135 +10,49 @@
   <link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { 
-      --red: #8B0000; --red-light: #B22222;
-      --gold: #B8860B; --gold-light: #DAA520;
-      --dark: #1a1a1a; --dark-light: #333;
-      --paper: #F5F0E4; --paper-light: #FAF6ED;
-      --shadow: rgba(0,0,0,0.2); --shadow-heavy: rgba(0,0,0,0.4);
-    }
+    :root { --red: #8B0000; --gold: #B8860B; --dark: #1a1a1a; --paper: #F5F0E4; }
     body { font-family: 'ZCOOL XiaoWei', serif; background: var(--paper); color: var(--dark); min-height: 100vh; }
     button { cursor: pointer; font-family: inherit; }
     *:disabled { opacity: 0.5; }
 
-    /* 立体效果 */
-    .box-3d {
-      background: #fff;
-      border: 3px solid var(--dark);
-      box-shadow: 6px 6px 0 var(--dark), 8px 8px 10px var(--shadow-heavy);
-      position: relative;
-    }
-    .box-3d::before {
-      content: ''; position: absolute; inset: 6px; border: 1px dashed var(--dark-light);
-      pointer-events: none; opacity: 0.3;
-    }
-    .box-inner {
-      background: var(--paper-light);
-      border: 2px solid var(--dark);
-      box-shadow: inset 3px 3px 0 var(--paper), inset -2px -2px 0 rgba(0,0,0,0.1);
-    }
+    .box-3d { background: #fff; border: 3px solid var(--dark); box-shadow: 6px 6px 0 var(--dark); position: relative; }
+    .box-3d::before { content: ''; position: absolute; inset: 6px; border: 1px dashed rgba(0,0,0,0.2); pointer-events: none; }
 
-    .btn-3d {
-      background: var(--red);
-      color: white;
-      border: 3px solid var(--dark);
-      box-shadow: 4px 4px 0 var(--dark), 6px 6px 8px var(--shadow);
-      padding: 14px 24px;
-      font-size: 18px;
-      transition: all 0.1s;
-    }
+    .btn-3d { background: var(--red); color: white; border: 3px solid var(--dark); box-shadow: 4px 4px 0 var(--dark); padding: 14px 24px; font-size: 18px; }
     .btn-3d:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--dark); }
-    .btn-gold {
-      background: var(--gold);
-      border: 2px solid var(--dark);
-      box-shadow: 3px 3px 0 var(--dark);
-    }
-    .btn-gold:hover { background: var(--gold-light); }
+    .btn-gold { background: var(--gold); color: white; border: 2px solid var(--dark); box-shadow: 3px 3px 0 var(--dark); }
 
-    /* 登录 */
     #loginPage { min-height: 100vh; display: none; align-items: center; justify-content: center; padding: 20px; }
-    .login-card {
-      background: linear-gradient(160deg, var(--paper-light) 0%, var(--paper) 50%, #E8E0D0 100%);
-      border: 4px solid var(--dark);
-      border-radius: 8px;
-      padding: 50px 40px;
-      box-shadow: 10px 10px 0 var(--dark), 15px 15px 20px var(--shadow-heavy);
-    }
-    .login-card h1 { font-size: 44px; color: var(--red); text-align: center; margin-bottom: 8px; text-shadow: 2px 2px 0 var(--gold); }
-    .login-card p { color: #666; text-align: center; margin-bottom: 25px; font-size: 17px; }
+    .login-card { background: linear-gradient(160deg, #fff 0%, var(--paper) 100%); border: 4px solid var(--dark); padding: 50px 40px; box-shadow: 10px 10px 0 var(--dark); }
+    .login-card h1 { font-size: 44px; color: var(--red); text-align: center; margin-bottom: 8px; }
+    .login-card p { color: #666; text-align: center; margin-bottom: 25px; }
 
-    /* Toast */
     .toast-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; }
-    .toast-overlay.show { display: flex; animation: fadeIn 0.2s; }
-    .toast-box {
-      background: var(--paper-light);
-      border: 4px solid var(--dark);
-      border-radius: 8px;
-      padding: 30px;
-      box-shadow: 8px 8px 0 var(--dark);
-      text-align: center;
-      max-width: 320px;
-    }
+    .toast-overlay.show { display: flex; }
+    .toast-box { background: #fff; border: 4px solid var(--dark); padding: 30px; box-shadow: 8px 8px 0 var(--dark); text-align: center; max-width: 320px; }
     .toast-box h3 { font-size: 24px; color: var(--red); margin-bottom: 12px; }
     .toast-box p { font-size: 17px; color: #555; margin-bottom: 20px; }
-    .toast-box .btn { background: var(--red); color: white; border: 3px solid var(--dark); padding: 12px 30px; font-size: 18px; box-shadow: 3px 3px 0 var(--dark); }
+    .toast-box .btn { background: var(--red); color: white; border: 3px solid var(--dark); padding: 12px 30px; box-shadow: 3px 3px 0 var(--dark); }
 
     #appPage { display: none; }
-    .app-header {
-      background: linear-gradient(180deg, var(--red-light) 0%, var(--red) 100%);
-      color: white;
-      padding: 14px 18px;
-      display: flex; justify-content: space-between; align-items: center;
-      position: sticky; top: 0; z-index: 100;
-      box-shadow: 0 4px 0 var(--dark), 0 6px 15px var(--shadow-heavy);
-    }
-    .app-header h1 { font-size: 21px; letter-spacing: 2px; text-shadow: 1px 1px 0 rgba(0,0,0,0.3); }
+    .app-header { background: var(--red); color: white; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 0 var(--dark); }
+    .app-header h1 { font-size: 21px; letter-spacing: 2px; }
     .header-right { display: flex; gap: 12px; align-items: center; }
-    .coin-badge {
-      background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 100%);
-      color: white;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 14px;
-      border: 2px solid var(--dark);
-      box-shadow: 2px 2px 0 var(--dark);
-    }
+    .coin-badge { background: var(--gold); color: white; padding: 6px 14px; border-radius: 20px; font-size: 14px; border: 2px solid var(--dark); box-shadow: 2px 2px 0 var(--dark); }
 
     .page-section { display: none; padding: 16px; }
     .page-section.active { display: block; }
 
-    .section-tit {
-      font-size: 24px; color: var(--red);
-      border-bottom: 3px solid var(--red);
-      border-radius: 0 0 4px 4px;
-      padding-bottom: 8px;
-      margin-bottom: 16px;
-      text-shadow: 1px 1px 0 var(--gold);
-    }
+    .section-tit { font-size: 24px; color: var(--red); border-bottom: 3px solid var(--red); padding-bottom: 8px; margin-bottom: 16px; }
 
     .func-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 14px 0; }
-    .func-btn {
-      background: linear-gradient(180deg, #fff 0%, #f0ebe0 100%);
-      border: 2px solid var(--dark);
-      padding: 14px 6px;
-      text-align: center;
-      cursor: pointer;
-      box-shadow: 3px 3px 0 var(--dark);
-      border-radius: 4px;
-    }
+    .func-btn { background: #fff; border: 2px solid var(--dark); padding: 14px 6px; text-align: center; cursor: pointer; box-shadow: 3px 3px 0 var(--dark); }
     .func-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--dark); }
     .func-btn .icon { font-size: 28px; display: block; margin-bottom: 4px; }
     .func-btn .txt { font-size: 13px; }
 
     .card-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-    .my-card {
-      background: linear-gradient(180deg, #fff 0%, #f5f0e4 100%);
-      border: 2px solid var(--dark);
-      padding: 6px;
-      text-align: center;
-      box-shadow: 2px 2px 0 var(--dark);
-      border-radius: 3px;
-    }
+    .my-card { background: #fff; border: 2px solid var(--dark); padding: 6px; text-align: center; box-shadow: 2px 2px 0 var(--dark); }
     .my-card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
     .my-card .name { font-size: 10px; font-weight: bold; margin-top: 3px; }
     .rarity-N { color: #666; }
@@ -147,100 +61,38 @@
     .rarity-LOG { color: #D97706; }
 
     .draw-result { text-align: center; padding: 35px; }
-    .draw-card {
-      display: inline-block;
-      background: linear-gradient(180deg, #fff 0%, #f5f0e4 100%);
-      border: 4px solid var(--dark);
-      padding: 18px;
-      box-shadow: 6px 6px 0 var(--dark);
-      border-radius: 6px;
-    }
+    .draw-card { display: inline-block; background: #fff; border: 4px solid var(--dark); padding: 18px; box-shadow: 6px 6px 0 var(--dark); }
     .draw-card img { width: 85px; height: 85px; object-fit: contain; }
     .draw-name { font-size: 18px; font-weight: bold; margin-top: 8px; }
 
-    .input-3d {
-      background: var(--paper-light);
-      border: 2px solid var(--dark);
-      padding: 12px;
-      font-size: 15px;
-      width: 100%;
-      display: block;
-      margin-bottom: 10px;
-      box-shadow: inset 2px 2px 0 rgba(0,0,0,0.1);
-    }
-    .input-3d:focus { outline: none; border-color: var(--red); background: #fff; }
+    .input-3d { background: var(--paper); border: 2px solid var(--dark); padding: 12px; font-size: 15px; width: 100%; display: block; margin-bottom: 10px; box-shadow: inset 2px 2px 0 rgba(0,0,0,0.1); }
     select.input-3d { cursor: pointer; }
 
-    .tab-bar {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      background: linear-gradient(180deg, #fff 0%, #f0ebe0 100%);
-      border-top: 3px solid var(--dark);
-      display: flex; justify-content: space-around;
-      padding: 10px 0;
-      z-index: 100;
-      box-shadow: 0 -4px 0 var(--dark);
-    }
+    .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 3px solid var(--dark); display: flex; justify-content: space-around; padding: 10px 0; z-index: 100; box-shadow: 0 -4px 0 var(--dark); }
     .tab-item { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: #777; cursor: pointer; }
     .tab-item.active { color: var(--red); font-weight: bold; }
     .tab-icon { font-size: 24px; margin-bottom: 2px; }
 
-    .seal-tag {
-      background: linear-gradient(180deg, var(--red-light) 0%, var(--red) 100%);
-      color: white;
-      padding: 4px 12px;
-      font-size: 12px;
-      border: 2px solid var(--dark);
-      box-shadow: 2px 2px 0 var(--dark);
-      display: inline-block;
-    }
-
+    .seal-tag { background: var(--red); color: white; padding: 4px 12px; font-size: 12px; border: 2px solid var(--dark); box-shadow: 2px 2px 0 var(--dark); display: inline-block; }
     .ann-item { border-left: 4px solid var(--red); padding-left: 12px; margin: 12px 0; }
     .ann-item b { font-size: 17px; }
     .ann-item p { font-size: 13px; color: #666; margin-top: 4px; }
 
     .shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .shop-item {
-      background: linear-gradient(180deg, #fff 0%, #f5f0e4 100%);
-      border: 2px solid var(--dark);
-      padding: 16px;
-      text-align: center;
-      box-shadow: 3px 3px 0 var(--dark);
-      border-radius: 4px;
-    }
+    .shop-item { background: #fff; border: 2px solid var(--dark); padding: 16px; text-align: center; box-shadow: 3px 3px 0 var(--dark); }
     .shop-item .icon { font-size: 30px; display: block; margin-bottom: 8px; }
     .shop-item .price { color: var(--gold); font-weight: bold; }
 
-    .user-card {
-      text-align: center;
-      padding: 22px;
-      background: linear-gradient(180deg, #fff 0%, var(--paper-light) 100%);
-      border: 3px solid var(--dark);
-      margin-bottom: 16px;
-      box-shadow: 5px 5px 0 var(--dark);
-    }
+    .user-card { text-align: center; padding: 22px; background: #fff; border: 3px solid var(--dark); margin-bottom: 16px; box-shadow: 5px 5px 0 var(--dark); }
     .user-card h2 { color: var(--red); font-size: 28px; }
     .user-card p { font-size: 20px; margin-top: 8px; }
 
-    .guide-box {
-      background: linear-gradient(135deg, var(--paper-light) 0%, var(--paper) 100%);
-      border: 3px solid var(--gold);
-      padding: 18px;
-      margin-bottom: 18px;
-      box-shadow: 3px 3px 0 var(--gold);
-    }
+    .guide-box { background: var(--paper); border: 3px solid var(--gold); padding: 18px; margin-bottom: 18px; box-shadow: 3px 3px 0 var(--gold); }
     .guide-box h3 { color: var(--gold); font-size: 18px; margin-bottom: 10px; }
     .guide-box li { margin: 6px 0; font-size: 15px; }
 
-    .comm-card {
-      background: linear-gradient(180deg, #fff 0%, #f5f0e4 100%);
-      border: 2px solid var(--dark);
-      padding: 14px;
-      margin-bottom: 10px;
-      box-shadow: 3px 3px 0 var(--dark);
-    }
+    .comm-card { background: #fff; border: 2px solid var(--dark); padding: 14px; margin-bottom: 10px; box-shadow: 3px 3px 0 var(--dark); }
     .comm-card .level { background: var(--gold); color: white; padding: 2px 8px; font-size: 12px; border: 1px solid var(--dark); }
-
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   </style>
 </head>
 <body>
@@ -305,7 +157,7 @@
         
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px;">
           <button class="btn-3d" onclick="createComm()">创建 (500💰)</button>
-          <button class="btn-gold" onclick="joinComm()">加入</button>
+          <button class="btn-gold" onclick="refreshComm()">刷新</button>
         </div>
         
         <h4 style="margin:15px 0 10px;">我的粉丝团</h4>
@@ -320,10 +172,26 @@
       <div class="box-3d" style="padding:20px;">
         <h3 class="section-tit">🛒 商店</h3>
         <div class="shop-grid">
-          <div class="shop-item"><span class="icon">🎁</span><p class="rarity-N">基础包</p><button class="btn-gold" onclick="buyPack(100)">100💰</button></div>
-          <div class="shop-item"><span class="icon">🎁</span><p class="rarity-R">稀有包</p><button class="btn-gold" onclick="buyPack(300)">300💰</button></div>
-          <div class="shop-item"><span class="icon">🎁</span><p class="rarity-SSR">传说包</p><button class="btn-gold" onclick="buyPack(1000)">1000💰</button></div>
-          <div class="shop-item"><span class="icon">🎁</span><p class="rarity-LOG">隐藏包</p><button class="btn-gold" onclick="buyPack(5000)">5000💰</button></div>
+          <div class="shop-item" onclick="buyPack(100)">
+            <img src="cards/基礎禮包圖.png" style="width:80px;display:block;margin:0 auto 8px;">
+            <p class="rarity-N">基础包</p>
+            <p class="price">100💰</p>
+          </div>
+          <div class="shop-item" onclick="buyPack(300)">
+            <img src="cards/稀有禮包圖.png" style="width:80px;display:block;margin:0 auto 8px;">
+            <p class="rarity-R">稀有包</p>
+            <p class="price">300💰</p>
+          </div>
+          <div class="shop-item" onclick="buyPack(1000)">
+            <img src="cards/傳說禮包圖.png" style="width:80px;display:block;margin:0 auto 8px;">
+            <p class="rarity-SSR">传说包</p>
+            <p class="price">1000💰</p>
+          </div>
+          <div class="shop-item" onclick="buyPack(5000)">
+            <img src="cards/隱藏禮包圖.png" style="width:80px;display:block;margin:0 auto 8px;">
+            <p class="rarity-LOG">隐藏包</p>
+            <p class="price">5000💰</p>
+          </div>
         </div>
       </div>
     </div>
@@ -407,7 +275,13 @@
     const db = firebase.firestore();
 
     let user = null, coins = 0, isAdmin = false, lastDraw = null;
-    const CARD_POOL = { N:[1,2], R:[3,4], SSR:[5,6], LOG:[7,8] };
+    // 礼包的卡牌池
+    const PACKS = { 
+      N: { pool: [5,6], img: 'cards/基礎禮包圖.png' },      // 基础包
+      R: { pool: [7,8], img: 'cards/稀有禮包圖.png' },      // 稀有包
+      SSR: { pool: [7,8], img: 'cards/傳說禮包圖.png' },     // 传说包
+      LOG: { pool: [7,8], img: 'cards/隱藏禮包圖.png' }     // 隐藏包
+    };
     const RARY = {N:60,R:25,SSR:12,LOG:3};
     const LEVELS = {1:'铜',2:'银',3:'金',4:'钻'};
 
@@ -427,6 +301,7 @@
         if (tab) tab.classList.add('active');
       }
       if (page === 'community') loadComm();
+      if (page === 'cards') loadCards();
     }
 
     async function login() {
@@ -438,47 +313,81 @@
     }
     async function logout() { await auth.signOut(); }
 
+    // 实时监听用户数据
+    function subscribeUser() {
+      if (!user) return;
+      db.collection('users').doc(user.uid).onSnapshot((doc) => {
+        if (doc.exists) {
+          const data = doc.data();
+          coins = data.coins || 0;
+          lastDraw = data.lastDraw;
+          document.getElementById('coins').textContent = coins;
+          document.getElementById('freeCount').textContent = (lastDraw === new Date().toLocaleDateString('zh-CN')) ? 0 : 1;
+        }
+      });
+    }
+
+    // 实时监听卡牌
+    function subscribeCards() {
+      if (!user) return;
+      db.collection('userCards').where('uid','==',user.uid).onSnapshot((snapshot) => {
+        document.getElementById('cardCount').textContent = `(${snapshot.size}张)`;
+        document.getElementById('cardGrid').innerHTML = snapshot.empty ? '<p style="grid-column:span 4;color:#888;text-align:center;">暂无卡牌</p>' :
+          snapshot.docs.map(d => {
+            const c = d.data();
+            // 每张卡都有唯一ID和时间戳
+            return `<div class="my-card"><img src="cards/${c.cardId}.png"><p class="name rarity-${c.rarity}">#${c.uniqueId}</p></div>`;
+          }).join('');
+      });
+    }
+
+    // 实时监听公告
+    function subscribeAnn() {
+      db.collection('announcements').orderBy('createdAt','desc').limit(5).onSnapshot((snapshot) => {
+        document.getElementById('annList').innerHTML = snapshot.empty ? '<p style="color:#888;">暂无公告</p>' : 
+          snapshot.docs.map(d => `<div class="ann-item"><b>${d.data().title}</b><p>${d.data().content}</p></div>`).join('');
+      });
+    }
+
     auth.onAuthStateChanged(async (u) => {
       if (!u) { document.getElementById('loginPage').style.display = 'flex'; document.getElementById('appPage').style.display = 'none'; return; }
       user = u; isAdmin = u.email === 'jacob.frog.jacob@gmail.com';
+      
       const doc = await db.collection('users').doc(u.uid).get();
       if (doc.exists) { coins = doc.data().coins || 0; lastDraw = doc.data().lastDraw; }
       else { await db.collection('users').doc(u.uid).set({email:u.email, displayName:u.displayName, coins:100, createdAt:new Date()}); coins=100; showToast('恭喜!','新用户赠送100金币!'); }
+      
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('appPage').style.display = 'block';
-      updateUI(); loadData(); loadUsers();
-    });
-
-    function updateUI() {
-      document.getElementById('coins').textContent = coins;
+      
+      // 启动实时监听
+      subscribeUser();
+      subscribeCards();
+      subscribeAnn();
+      
       document.getElementById('userName').textContent = user?.displayName || '';
       document.getElementById('adminTag').style.display = isAdmin ? 'inline-block' : 'none';
       document.getElementById('admin').style.display = isAdmin ? 'block' : 'none';
       document.getElementById('loginBtn').textContent = 'Google 登录';
       document.getElementById('loginBtn').disabled = false;
-    }
-
-    async function loadUsers() {
-      if (!isAdmin) return;
-      const snap = await db.collection('users').get();
-      const opts = '<option value="">选择用户...</option>';
-      document.getElementById('userSelect').innerHTML = opts + snap.docs.map(d => `<option value="${d.id}">${d.data().displayName}</option>`).join('');
-      document.getElementById('cardUserSelect').innerHTML = opts + snap.docs.map(d => `<option value="${d.id}">${d.data().displayName}</option>`).join('');
-    }
-
-    async function loadData() {
-      const snap = await db.collection('announcements').orderBy('createdAt','desc').limit(5).get();
-      document.getElementById('annList').innerHTML = snap.empty ? '<p style="color:#888;">暂无公告</p>' : snap.docs.map(d => `<div class="ann-item"><b>${d.data().title}</b><p>${d.data().content}</p></div>`).join('');
-      const csnap = await db.collection('userCards').where('uid','==',user.uid).get();
-      document.getElementById('cardCount').textContent = `(${csnap.size}张)`;
-      document.getElementById('cardGrid').innerHTML = csnap.empty ? '<p style="grid-column:span 4;color:#888;text-align:center;">暂无卡牌</p>' : csnap.docs.map(d => `<div class="my-card"><img src="cards/${d.data().cardId}.png"><p class="name rarity-${d.data().rarity}">${d.data().rarity}-${d.data().cardId}</p></div>`).join('');
       document.getElementById('freeCount').textContent = (lastDraw === new Date().toLocaleDateString('zh-CN')) ? 0 : 1;
+      
       if (isAdmin) {
-        const ssnap = await db.collection('submissions').where('status','==','pending').get();
-        document.getElementById('pendingNum').textContent = `(${ssnap.size})`;
-        document.getElementById('subList').innerHTML = ssnap.empty ? '<p>暂无投稿</p>' : ssnap.docs.map(d => `<div style="border:2px solid #ccc;padding:12px;margin:8px 0;background:#fff;"><b>${d.data().userName}</b><p>${d.data().content}</p><button class="btn-gold" style="margin-right:6px;" onclick="appSub('${d.id}',true)">通过</button><button class="btn-gold" onclick="appSub('${d.id}',false)">拒绝</button></div>`).join('');
+        const userSnap = await db.collection('users').get();
+        const opts = '<option value="">选择用户...</option>';
+        document.getElementById('userSelect').innerHTML = opts + userSnap.docs.map(d => `<option value="${d.id}">${d.data().displayName}</option>`).join('');
+        document.getElementById('cardUserSelect').innerHTML = opts + userSnap.docs.map(d => `<option value="${d.id}">${d.data().displayName}</option>`).join('');
+        
+        db.collection('submissions').where('status','==','pending').onSnapshot((ssnap) => {
+          document.getElementById('pendingNum').textContent = `(${ssnap.size})`;
+          document.getElementById('subList').innerHTML = ssnap.empty ? '<p>暂无投稿</p>' : 
+            ssnap.docs.map(d => `<div style="border:2px solid #ccc;padding:12px;margin:8px 0;background:#fff;"><b>${d.data().userName}</b><p>${d.data().content}</p><button class="btn-gold" style="margin-right:6px;" onclick="appSub('${d.id}',true)">通过</button><button class="btn-gold" onclick="appSub('${d.id}',false)">拒绝</button></div>`).join('');
+        });
       }
-    }
+    });
+
+    async function loadCards() { subscribeCards(); }
+    async function refreshComm() { loadComm(); }
 
     async function loadComm() {
       const allSnap = await db.collection('communities').get();
@@ -503,7 +412,7 @@
       await db.collection('users').doc(user.uid).update({coins:coins});
       await db.collection('communities').add({name, ownerId:user.uid, ownerName:user.displayName, level:1, description:'', members:[user.uid], createdAt:new Date()});
       showToast('成功!','粉丝团创建成功!');
-      updateUI(); loadComm();
+      loadComm();
     }
 
     async function joinComm(id) {
@@ -524,27 +433,42 @@
       coins -= cost;
       await db.collection('users').doc(user.uid).update({coins:coins});
       await db.collection('communities').doc(id).update({level:level+1});
-      showToast('成功!','升级成功!'); updateUI(); loadComm();
+      showToast('成功!','升级成功!'); loadComm();
     }
 
     async function doDraw() {
-      const btn = document.getElementById('drawBtn'); btn.disabled = true;
+      const btn = document.getElementById('drawBtn'); 
+      btn.disabled = true;
       const today = new Date().toLocaleDateString('zh-CN');
       let free = (lastDraw === today) ? 0 : 1;
       if (free === 0 && coins < 100) { showToast('提示','金币不足!'); btn.disabled = false; return; }
       if (free > 0) await db.collection('users').doc(user.uid).update({lastDraw:today});
       else { coins -= 100; await db.collection('users').doc(user.uid).update({coins:coins}); }
+      
       document.getElementById('drawResult').innerHTML = '<div style="font-size:32px;">🔄 旋转中...</div>';
       await new Promise(r => setTimeout(r, 1500));
+      
       let rand = Math.random() * 100, cum = 0, rar = 'N';
       for (const [k,v] of Object.entries(RARY)) { cum += v; if (rand <= cum) { rar = k; break; } }
-      const pool = CARD_POOL[rar];
-      const cardId = pool[Math.floor(Math.random() * pool.length)];
-      await db.collection('userCards').add({uid:user.uid, cardId:cardId, rarity:rar, date:new Date()});
+      const pack = PACKS[rar];
+      const cardId = pack.pool[Math.floor(Math.random() * pack.pool.length)];
+      
+      // 生成唯一ID
+      const uniqueId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+      
+      await db.collection('userCards').add({
+        uid: user.uid, 
+        cardId: cardId, 
+        rarity: rar, 
+        uniqueId: uniqueId,
+        packImg: pack.img,
+        date: new Date()
+      });
+      
       const name = rar==='N'?'普通':rar==='R'?'稀有':rar==='SSR'?'传说':'隐藏';
-      document.getElementById('drawResult').innerHTML = `<div class="draw-card"><img src="cards/${cardId}.png"><p class="draw-name rarity-${rar}">#${cardId}</p><p class="rarity-${rar}">${name}</p></div>`;
-      showToast('恭喜!',`获得 ${name} 卡牌!`);
-      updateUI(); loadData(); btn.disabled = false;
+      document.getElementById('drawResult').innerHTML = `<div class="draw-card"><img src="cards/${cardId}.png"><p class="draw-name rarity-${rar}">#${uniqueId}</p><p class="rarity-${rar}">${name}</p></div>`;
+      showToast('恭喜!',`获得 ${name} 卡牌! (#${uniqueId})`);
+      btn.disabled = false;
     }
 
     async function submitPost() {
@@ -564,16 +488,35 @@
       showToast('成功!','公告已发布!');
       document.getElementById('annTitle').value = '';
       document.getElementById('annContent').value = '';
-      loadData();
     }
 
     async function appSub(id, ok) {
       await db.collection('submissions').doc(id).update({status:ok?'approved':'rejected'});
       showToast('成功!', ok?'已通过':'已拒绝');
-      loadData();
     }
 
-    async function buyPack(price) { if (coins < price) { showToast('提示','金币不足!'); return; } coins -= price; await db.collection('users').doc(user.uid).update({coins:coins}); showToast('成功!','购买成功!'); updateUI(); }
+    async function buyPack(price) {
+      if (coins < price) { showToast('提示','金币不足!'); return; }
+      coins -= price;
+      await db.collection('users').doc(user.uid).update({coins:coins});
+      
+      // 购买卡包直接给卡牌
+      let rar = price===100?'N':price===300?'R':price===1000?'SSR':'LOG';
+      const pack = PACKS[rar];
+      const cardId = pack.pool[Math.floor(Math.random() * pack.pool.length)];
+      const uniqueId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+      
+      await db.collection('userCards').add({
+        uid: user.uid,
+        cardId: cardId,
+        rarity: rar,
+        uniqueId: uniqueId,
+        packImg: pack.img,
+        date: new Date()
+      });
+      
+      showToast('成功!','购买成功! 获得卡牌!');
+    }
 
     async function addCoins() {
       if (!isAdmin) return;
@@ -590,9 +533,10 @@
       const uid = document.getElementById('cardUserSelect').value;
       const rarity = document.getElementById('cardRarity').value;
       if (!uid) { showToast('提示','请选择用户!'); return; }
-      const pool = CARD_POOL[rarity];
-      const cardId = pool[Math.floor(Math.random() * pool.length)];
-      await db.collection('userCards').add({uid:uid, cardId:cardId, rarity:rarity, date:new Date()});
+      const pack = PACKS[rar];
+      const cardId = pack.pool[Math.floor(Math.random() * pack.pool.length)];
+      const uniqueId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+      await db.collection('userCards').add({uid:uid, cardId:cardId, rarity:rar, uniqueId:uniqueId, packImg:pack.img, date:new Date()});
       showToast('成功!','卡牌已发放!');
     }
   </script>
