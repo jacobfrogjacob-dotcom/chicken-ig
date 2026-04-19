@@ -90,9 +90,8 @@
     .nav-item.active { color: var(--chinese-red); font-weight: bold; }
     .nav-icon { font-size: 24px; }
     .page { display: none; }
-    .page.active, #loginPage { display: block; }
+    #loginPage { display: block; }
     #appPage { display: none; }
-    #appPage.active { display: block; }
     .border-box {
       border: 3px solid var(--ink-black);
       position: relative;
@@ -154,6 +153,7 @@
         <h1 style="font-size: 36px; color: var(--chinese-red);">IG粉絲小程序</h1>
         <p style="font-size: 18px; margin: 20px 0;">書法風格抽卡系統</p>
         <button class="btn" id="loginBtn" onclick="login()">使用 Google 帳號登入</button>
+        <button class="btn mt-2" style="background: #666;" onclick="location.reload()">重新整理</button>
         <p id="loginError" style="color: red; margin-top: 10px;"></p>
         <div id="debugInfo" style="font-size: 12px; color: blue;"></div>
       </div>
@@ -373,23 +373,11 @@
 
     const RARITY = { N: 60, R: 25, SSR: 12, LOG: 3 };
 
-    async function login() {
-      // 使用 redirect 方式避免弹窗被阻挡
-      const provider = new firebase.auth.GoogleAuthProvider();
-      try {
-        await auth.signInWithRedirect(provider);
-      } catch (error) {
-        console.error('登入錯誤:', error);
-        document.getElementById('loginError').textContent = '登入失败: ' + error.message;
-      }
-    }
-
     // 检查是否已经登入
     auth.onAuthStateChanged(async (user) => {
       if (user) {
         currentUser = user;
-        const email = user.email;
-        isAdmin = email === 'jacob.frog.jacob@gmail.com';
+        isAdmin = user.email === 'jacob.frog.jacob@gmail.com';
         
         const userDoc = await db.collection('users').doc(user.uid).get();
         if (userDoc.exists) {
@@ -407,10 +395,29 @@
         }
         updateUserUI();
         loadData();
-      } else {
-        showPage('login');
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('appPage').style.display = 'block';
       }
     });
+
+    async function login() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      try {
+        await auth.signInWithPopup(provider);
+        // 检查是否成功
+        setTimeout(() => {
+          if (currentUser) {
+            alert('登入成功！');
+            location.reload();
+          } else {
+            alert('請確認 Google 登入視窗');
+          }
+        }, 2000);
+      } catch(e) {
+        alert('錯誤: ' + e.message);
+      }
+    }
 
     async function logout() {
       await auth.signOut();
@@ -430,19 +437,14 @@
     }
 
     function showPage(page) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById('appPage').classList.remove('active');
-      document.getElementById('loginPage').classList.remove('active');
+      document.querySelectorAll('#appPage > div').forEach(div => div.style.display = 'none');
       if (page === 'login') {
-        document.getElementById('loginPage').classList.add('active');
+        document.getElementById('loginPage').style.display = 'block';
+        document.getElementById('appPage').style.display = 'none';
       } else {
-        document.getElementById('appPage').classList.add('active');
-        document.getElementById(page + 'Page').classList.add('active');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        const navIndex = ['home', 'service', 'community', 'shop'].indexOf(page);
-        if (navIndex >= 0) {
-          document.querySelectorAll('.nav-item')[navIndex].classList.add('active');
-        }
+        document.getElementById('appPage').style.display = 'block';
+        const targetPage = document.getElementById(page + 'Page');
+        if (targetPage) targetPage.style.display = 'block';
       }
     }
 
