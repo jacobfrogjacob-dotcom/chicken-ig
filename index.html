@@ -173,22 +173,22 @@
         <h3 class="section-tit">🛒 商店</h3>
         <div class="shop-grid">
           <div class="shop-item" onclick="buyPack(100)">
-            <img src="cards/基礎禮包圖.png" style="width:80px;display:block;margin:0 auto 8px;">
+            <img src="cards/pack-basic.png" style="width:80px;display:block;margin:0 auto 8px;">
             <p class="rarity-N">基础包</p>
             <p class="price">100💰</p>
           </div>
           <div class="shop-item" onclick="buyPack(300)">
-            <img src="cards/稀有禮包圖.png" style="width:80px;display:block;margin:0 auto 8px;">
+            <img src="cards/pack-rare.png" style="width:80px;display:block;margin:0 auto 8px;">
             <p class="rarity-R">稀有包</p>
             <p class="price">300💰</p>
           </div>
           <div class="shop-item" onclick="buyPack(1000)">
-            <img src="cards/傳說禮包圖.png" style="width:80px;display:block;margin:0 auto 8px;">
+            <img src="cards/pack-ssr.png" style="width:80px;display:block;margin:0 auto 8px;">
             <p class="rarity-SSR">传说包</p>
             <p class="price">1000💰</p>
           </div>
           <div class="shop-item" onclick="buyPack(5000)">
-            <img src="cards/隱藏禮包圖.png" style="width:80px;display:block;margin:0 auto 8px;">
+            <img src="cards/pack-log.png" style="width:80px;display:block;margin:0 auto 8px;">
             <p class="rarity-LOG">隐藏包</p>
             <p class="price">5000💰</p>
           </div>
@@ -277,10 +277,10 @@
     let user = null, coins = 0, isAdmin = false, lastDraw = null;
     // 礼包的卡牌池
     const PACKS = { 
-      N: { pool: [5,6], img: 'cards/基礎禮包圖.png' },
-      R: { pool: [7,8], img: 'cards/稀有禮包圖.png' },
-      SSR: { pool: [7,8], img: 'cards/傳說禮包圖.png' },
-      LOG: { pool: [7,8], img: 'cards/隱藏禮包圖.png' }
+      N: { pool: [5,6], img: 'cards/pack-basic.png' },
+      R: { pool: [7,8], img: 'cards/pack-rare.png' },
+      SSR: { pool: [7,8], img: 'cards/pack-ssr.png' },
+      LOG: { pool: [7,8], img: 'cards/pack-log.png' }
     };
     const RARY = {N:60,R:25,SSR:12,LOG:3};
     const LEVELS = {1:'铜',2:'银',3:'金',4:'钻'};
@@ -307,9 +307,11 @@
     async function login() {
       const btn = document.getElementById('loginBtn');
       btn.disabled = true;
-      btn.textContent = '登录中...';
-      try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
-      catch(e) { showToast('错误','请允许弹窗!'); btn.textContent = 'Google 登录'; btn.disabled = false; }
+      btn.textContent = '跳转中...';
+      try { 
+        // 使用 redirect 方式避免弹窗被阻挡
+        await auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+      } catch(e) { showToast('错误','请允许弹窗!'); btn.textContent = 'Google 登录'; btn.disabled = false; }
     }
     async function logout() { await auth.signOut(); }
 
@@ -364,6 +366,14 @@
       subscribeUser();
       subscribeCards();
       subscribeAnn();
+      
+      // 检查 redirect 结果
+      try {
+        const result = await auth.getRedirectResult();
+        if (result.user) {
+          showToast('登录成功!', '欢迎 ' + user.displayName);
+        }
+      } catch(e) {}
       
       document.getElementById('userName').textContent = user?.displayName || '';
       document.getElementById('adminTag').style.display = isAdmin ? 'inline-block' : 'none';
