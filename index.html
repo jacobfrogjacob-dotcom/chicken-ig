@@ -362,17 +362,8 @@
       subscribeCards();
       subscribeAnn();
       
-      // 检查 redirect 结果并显示登录成功
-      try {
-        const result = await auth.getRedirectResult();
-        if (result.user) {
-          showToast('成功', '欢迎 ' + user.displayName);
-        }
-      } catch(e) {
-        console.log(e);
-      }
-      
       document.getElementById('userName').textContent = user?.displayName || '';
+      showToast('成功', '欢迎 ' + user.displayName);
       document.getElementById('adminTag').style.display = isAdmin ? 'inline-block' : 'none';
       document.getElementById('admin').style.display = isAdmin ? 'block' : 'none';
       document.getElementById('loginBtn').textContent = 'Google 登录';
