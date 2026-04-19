@@ -305,13 +305,9 @@
     }
 
     async function login() {
-      const btn = document.getElementById('loginBtn');
-      btn.disabled = true;
-      btn.textContent = '跳转中...';
-      try { 
-        // 使用 redirect 方式避免弹窗被阻挡
-        await auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
-      } catch(e) { showToast('错误','请允许弹窗!'); btn.textContent = 'Google 登录'; btn.disabled = false; }
+      showToast('提示', '点击后将跳转到Google登录页面');
+      const provider = new firebase.auth.GoogleAuthProvider();
+      await auth.signInWithRedirect(provider);
     }
     async function logout() { await auth.signOut(); }
 
