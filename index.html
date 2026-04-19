@@ -10,138 +10,50 @@
   <link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --red: #9B111E; --gold: #C5A000; --dark: #1a1a1a;
-      --paper: #F5EGD8; --paper-dark: #E8DFC8;
-    }
-    body {
-      font-family: 'ZCOOL XiaoWei', serif;
-      background: var(--paper);
-      background-image: 
-        radial-gradient(circle at 10% 20%, rgba(155,17,30,0.05) 0%, transparent 50%),
-        radial-gradient(circle at 90% 80%, rgba(197,160,0,0.05) 0%, transparent 50%);
-      color: var(--dark);
-      min-height: 100vh;
-    }
+    :root { --red: #9B111E; --gold: #C5A000; --dark: #1a1a1a; --paper: #F5EGD8; --paper-dark: #E8DFC8; }
+    body { font-family: 'ZCOOL XiaoWei', serif; background: var(--paper); background-image: radial-gradient(circle at 10% 20%, rgba(155,17,30,0.05) 0%, transparent 50%), radial-gradient(circle at 90% 80%, rgba(197,160,0,0.05) 0%, transparent 50%); color: var(--dark); min-height: 100vh; }
     button { cursor: pointer; font-family: inherit; }
+    *:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    /* 登录 */
-    #loginPage {
-      min-height: 100vh;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      padding: 20px;
-    }
-    .login-card {
-      background: linear-gradient(145deg, #fff 0%, var(--paper) 100%);
-      border: 4px solid var(--dark);
-      padding: 50px 40px;
-      position: relative;
-      box-shadow: 8px 8px 0 var(--dark);
-    }
-    .login-card::before {
-      content: ''; position: absolute; inset: 8px; border: 1px solid var(--dark);
-      pointer-events: none;
-    }
-    .login-card h1 {
-      font-size: 48px; color: var(--red);
-      text-align: center;
-      margin-bottom: 10px;
-      letter-spacing: 8px;
-    }
-    .login-card .subtitle {
-      color: #666;
-      text-align: center;
-      margin-bottom: 30px;
-      font-size: 18px;
-    }
-    .login-btn {
-      background: var(--red);
-      color: white;
-      border: 3px solid var(--dark);
-      padding: 18px 40px;
-      font-size: 24px;
-      display: block;
-      width: 100%;
-      box-shadow: 4px 4px 0 var(--dark);
-      transition: all 0.1s;
-    }
+    #loginPage { min-height: 100vh; display: none; align-items: center; justify-content: center; flex-direction: column; padding: 20px; }
+    .login-card { background: linear-gradient(145deg, #fff 0%, var(--paper) 100%); border: 4px solid var(--dark); padding: 50px 40px; position: relative; box-shadow: 8px 8px 0 var(--dark); }
+    .login-card::before { content: ''; position: absolute; inset: 8px; border: 1px solid var(--dark); pointer-events: none; }
+    .login-card h1 { font-size: 48px; color: var(--red); text-align: center; margin-bottom: 10px; letter-spacing: 8px; }
+    .login-card .subtitle { color: #666; text-align: center; margin-bottom: 30px; font-size: 18px; }
+    .login-btn { background: var(--red); color: white; border: 3px solid var(--dark); padding: 18px 40px; font-size: 24px; display: block; width: 100%; box-shadow: 4px 4px 0 var(--dark); }
     .login-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--dark); }
-    .login-btn:disabled { background: #999; cursor: not-allowed; }
 
-    /* 主APP */
+    /* Toast 弹窗 */
+    .toast-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
+    .toast-overlay.show { display: flex; animation: fadeIn 0.3s; }
+    .toast-box { background: #fff; border: 4px solid var(--dark); padding: 30px 40px; text-align: center; box-shadow: 8px 8px 0 var(--dark); max-width: 300px; }
+    .toast-box.success { border-color: #22c55e; }
+    .toast-box.error { border-color: var(--red); }
+    .toast-box h3 { font-size: 22px; color: var(--red); margin-bottom: 15px; }
+    .toast-box p { font-size: 18px; color: #666; margin-bottom: 20px; }
+    .toast-box .btn { background: var(--red); color: white; border: 2px solid var(--dark); padding: 12px 30px; font-size: 18px; }
+
     #appPage { display: none; }
-    .app-header {
-      background: var(--red);
-      color: white;
-      padding: 14px 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    }
+    .app-header { background: var(--red); color: white; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
     .app-header h1 { font-size: 22px; letter-spacing: 2px; }
     .header-right { display: flex; gap: 14px; align-items: center; }
-    .coin-badge {
-      background: var(--gold);
-      color: white;
-      padding: 5px 14px;
-      border-radius: 20px;
-      font-size: 15px;
-    }
+    .coin-badge { background: var(--gold); color: white; padding: 5px 14px; border-radius: 20px; font-size: 15px; }
 
-    /* 页面 */
     .page-section { display: none; padding: 16px; }
     .page-section.active { display: block; }
 
-    /* 卡片 */
-    .ink-box {
-      background: #fff;
-      border: 3px solid var(--dark);
-      padding: 24px;
-      margin-bottom: 16px;
-      position: relative;
-      box-shadow: 5px 5px 0 rgba(0,0,0,0.15);
-    }
-    .ink-box::after {
-      content: ''; position: absolute; inset: 5px; border: 1px dashed rgba(0,0,0,0.2);
-      pointer-events: none;
-    }
-    .section-tit {
-      font-size: 26px; color: var(--red);
-      border-bottom: 3px solid var(--red);
-      padding-bottom: 10px;
-      margin-bottom: 18px;
-    }
+    .ink-box { background: #fff; border: 3px solid var(--dark); padding: 24px; margin-bottom: 16px; position: relative; box-shadow: 5px 5px 0 rgba(0,0,0,0.15); }
+    .ink-box::after { content: ''; position: absolute; inset: 5px; border: 1px dashed rgba(0,0,0,0.2); pointer-events: none; }
+    .section-tit { font-size: 26px; color: var(--red); border-bottom: 3px solid var(--red); padding-bottom: 10px; margin-bottom: 18px; }
 
-    /* 功能块 */
     .func-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
-    .func-btn {
-      background: #fff;
-      border: 2px solid var(--dark);
-      padding: 16px 8px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.1s;
-      box-shadow: 3px 3px 0 var(--dark);
-    }
+    .func-btn { background: #fff; border: 2px solid var(--dark); padding: 16px 8px; text-align: center; cursor: pointer; box-shadow: 3px 3px 0 var(--dark); }
     .func-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--dark); }
     .func-btn .icon { font-size: 30px; display: block; margin-bottom: 6px; }
     .func-btn .txt { font-size: 14px; }
 
-    /* 卡片 */
     .card-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-    .my-card {
-      background: #fff;
-      border: 2px solid var(--dark);
-      padding: 8px;
-      text-align: center;
-    }
+    .my-card { background: #fff; border: 2px solid var(--dark); padding: 8px; text-align: center; }
     .my-card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
     .my-card .name { font-size: 11px; font-weight: bold; margin-top: 4px; }
     .rarity-N { color: #666; }
@@ -149,141 +61,43 @@
     .rarity-SSR { color: #9333EA; }
     .rarity-LOG { color: #D97706; }
 
-    /* 抽卡 */
     .draw-result { text-align: center; padding: 40px; }
-    .draw-card {
-      display: inline-block;
-      background: #fff;
-      border: 4px solid var(--dark);
-      padding: 20px;
-      box-shadow: 6px 6px 0 var(--dark);
-    }
+    .draw-card { display: inline-block; background: #fff; border: 4px solid var(--dark); padding: 20px; box-shadow: 6px 6px 0 var(--dark); }
     .draw-card img { width: 90px; height: 90px; object-fit: contain; }
     .draw-name { font-size: 20px; font-weight: bold; margin-top: 10px; }
 
-    /* 按钮 */
-    .btn-red {
-      background: var(--red);
-      color: white;
-      border: 3px solid var(--dark);
-      padding: 16px 28px;
-      font-size: 20px;
-      display: block;
-      width: 100%;
-      box-shadow: 4px 4px 0 var(--dark);
-    }
+    .btn-red { background: var(--red); color: white; border: 3px solid var(--dark); padding: 16px 28px; font-size: 20px; display: block; width: 100%; box-shadow: 4px 4px 0 var(--dark); }
     .btn-red:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--dark); }
-    .btn-gold {
-      background: var(--gold);
-      color: white;
-      border: 2px solid var(--dark);
-      padding: 12px 18px;
-      font-size: 15px;
-    }
+    .btn-gold { background: var(--gold); color: white; border: 2px solid var(--dark); padding: 12px 18px; font-size: 15px; }
 
-    /* 输入 */
-    .input-field {
-      background: var(--paper);
-      border: 2px solid var(--dark);
-      padding: 14px;
-      font-size: 16px;
-      width: 100%;
-      display: block;
-      margin-bottom: 12px;
-    }
+    .input-field { background: var(--paper); border: 2px solid var(--dark); padding: 14px; font-size: 16px; width: 100%; display: block; margin-bottom: 12px; }
     .input-field:focus { outline: none; border-color: var(--red); }
+    select.input-field { cursor: pointer; }
 
-    /* 导航 */
-    .tab-bar {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: #fff;
-      border-top: 3px solid var(--dark);
-      display: flex;
-      justify-content: space-around;
-      padding: 12px 0;
-      z-index: 100;
-    }
-    .tab-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      font-size: 12px;
-      color: #888;
-      cursor: pointer;
-    }
+    .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 3px solid var(--dark); display: flex; justify-content: space-around; padding: 12px 0; z-index: 100; }
+    .tab-item { display: flex; flex-direction: column; align-items: center; font-size: 12px; color: #888; cursor: pointer; }
     .tab-item.active { color: var(--red); font-weight: bold; }
     .tab-icon { font-size: 26px; margin-bottom: 3px; }
 
-    /* 印章 */
-    .seal-tag {
-      background: var(--red);
-      color: white;
-      padding: 4px 12px;
-      font-size: 13px;
-      display: inline-block;
-    }
-
-    /* 公告 */
-    .ann-item {
-      border-left: 4px solid var(--red);
-      padding-left: 14px;
-      margin: 14px 0;
-    }
+    .seal-tag { background: var(--red); color: white; padding: 4px 12px; font-size: 13px; display: inline-block; }
+    .ann-item { border-left: 4px solid var(--red); padding-left: 14px; margin: 14px 0; }
     .ann-item b { font-size: 18px; }
     .ann-item p { font-size: 14px; color: #666; margin-top: 5px; }
 
-    /* 商店 */
     .shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
-    .shop-item {
-      background: #fff;
-      border: 2px solid var(--dark);
-      padding: 18px;
-      text-align: center;
-    }
+    .shop-item { background: #fff; border: 2px solid var(--dark); padding: 18px; text-align: center; }
     .shop-item .icon { font-size: 34px; display: block; margin-bottom: 10px; }
     .shop-item .price { color: var(--gold); font-weight: bold; }
 
-    /* 用户信息 */
-    .user-card {
-      text-align: center;
-      padding: 24px;
-      background: #fff;
-      border: 3px solid var(--dark);
-      margin-bottom: 18px;
-    }
+    .user-card { text-align: center; padding: 24px; background: #fff; border: 3px solid var(--dark); margin-bottom: 18px; }
     .user-card h2 { color: var(--red); font-size: 30px; }
     .user-card p { font-size: 22px; margin-top: 10px; }
 
-    /* 加载 */
-    .loading { opacity: 0.6; pointer-events: none; }
-    .spinner { animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      background: var(--dark);
-      color: white;
-      padding: 16px 32px;
-      font-size: 18px;
-      z-index: 1000;
-      display: none;
-    }
-    .toast.show { display: block; animation: fadeIn 0.3s; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-    /* 新手引导 */
-    .guide-box {
-      background: linear-gradient(135deg, var(--paper) 0%, var(--paper-dark) 100%);
-      border: 3px solid var(--gold);
-      padding: 20px;
-      margin-bottom: 20px;
-    }
+    .guide-box { background: linear-gradient(135deg, var(--paper) 0%, var(--paper-dark) 100%); border: 3px solid var(--gold); padding: 20px; margin-bottom: 20px; }
     .guide-box h3 { color: var(--gold); font-size: 20px; margin-bottom: 12px; }
     .guide-box li { margin: 8px 0; font-size: 16px; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   </style>
 </head>
 <body>
@@ -291,13 +105,19 @@
   <div id="loginPage">
     <div class="login-card">
       <h1>粉丝小程序</h1>
-      <p class="subtitle">书法风格抽卡系统</p>
+      <p class="subtitle">书法风格抽���系��</p>
       <button class="login-btn" id="loginBtn" onclick="login()">Google 登录</button>
     </div>
   </div>
 
-  <!-- Toast -->
-  <div id="toast" class="toast"></div>
+  <!-- Toast弹窗 -->
+  <div id="toastOverlay" class="toast-overlay" onclick="closeToast()">
+    <div class="toast-box" onclick="event.stopPropagation()">
+      <h3 id="toastTitle"></h3>
+      <p id="toastMsg"></p>
+      <button class="btn" onclick="closeToast()">确定</button>
+    </div>
+  </div>
 
   <!-- 主APP -->
   <div id="appPage">
@@ -317,7 +137,6 @@
         <span id="adminTag" class="seal-tag" style="display:none;">管理员</span>
       </div>
       
-      <!-- 新手引导 -->
       <div class="guide-box" id="guideBox">
         <h3>📖 新手入门</h3>
         <ul>
@@ -338,15 +157,6 @@
         <div class="func-btn" onclick="go('draw')"><span class="icon">🎰</span><span class="txt">抽卡</span></div>
         <div class="func-btn" onclick="go('submit')"><span class="icon">✍️</span><span class="txt">投稿</span></div>
         <div class="func-btn" onclick="go('admin')"><span class="icon">⚙️</span><span class="txt">管理</span></div>
-      </div>
-    </div>
-
-    <!-- 客服 -->
-    <div id="service" class="page-section">
-      <div class="ink-box">
-        <h3 class="section-tit">📞 客服</h3>
-        <textarea id="msgInput" class="input-field" rows="3" placeholder="输入消息..."></textarea>
-        <button class="btn-red" onclick="sendMsg()">发送消息</button>
       </div>
     </div>
 
@@ -423,30 +233,32 @@
         <div id="subList"></div>
         
         <h4 style="margin:26px 0 10px;">💰 发放金币</h4>
-        <input id="addCoinsUid" class="input-field" placeholder="用户ID">
+        <select id="userSelect" class="input-field"><option value="">选择用户...</option></select>
         <input id="addCoinsNum" class="input-field" type="number" placeholder="数量">
         <button class="btn-red" onclick="addCoins()">发放金币</button>
+        
+        <h4 style="margin:26px 0 10px;">🎴 发放卡牌</h4>
+        <select id="cardUserSelect" class="input-field"><option value="">选择用户...</option></select>
+        <select id="cardRarity" class="input-field">
+          <option value="N">普通</option>
+          <option value="R">稀有</option>
+          <option value="SSR">传说</option>
+          <option value="LOG">隐藏</option>
+        </select>
+        <button class="btn-red" onclick="addCard()">发放卡牌</button>
       </div>
     </div>
 
     <nav class="tab-bar">
       <div class="tab-item active" onclick="go('home')"><span class="tab-icon">🏠</span><span>首页</span></div>
-      <div class="tab-item" onclick="go('service')"><span class="tab-icon">📞</span><span>客服</span></div>
       <div class="tab-item" onclick="go('community')"><span class="tab-icon">👥</span><span>社团</span></div>
       <div class="tab-item" onclick="go('shop')"><span class="tab-icon">🛒</span><span>商店</span></div>
+      <div class="tab-item" onclick="go('admin')"><span class="tab-icon">⚙️</span><span>管理</span></div>
     </nav>
   </div>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyC_gBRP1HaiEgWXML5_HOGDcukElEBCKes",
-      authDomain: "ig-chicken.firebaseapp.com",
-      projectId: "ig-chicken",
-      storageBucket: "ig-chicken.firebasestorage.app",
-      messagingSenderId: "336000604442",
-      appId: "1:336000604442:web:25da73c459e1a5d86ab4a3"
-    };
-
+    const firebaseConfig = { apiKey: "AIzaSyC_gBRP1HaiEgWXML5_HOGDcukElEBCKes", authDomain: "ig-chicken.firebaseapp.com", projectId: "ig-chicken", storageBucket: "ig-chicken.firebasestorage.app", messagingSenderId: "336000604442", appId: "1:336000604442:web:25da73c459e1a5d86ab4a3" };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -455,12 +267,14 @@
     const CARD_POOL = { N:[1,2], R:[3,4], SSR:[5,6], LOG:[7,8] };
     const RARY = {N:60,R:25,SSR:12,LOG:3};
 
-    function showToast(msg, duration = 2000) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), duration);
+    function showToast(title, msg, type = 'success') {
+      const el = document.getElementById('toastOverlay');
+      document.getElementById('toastTitle').textContent = title;
+      document.getElementById('toastMsg').textContent = msg;
+      el.querySelector('.toast-box').className = 'toast-box ' + type;
+      el.classList.add('show');
     }
+    function closeToast() { document.getElementById('toastOverlay').classList.remove('show'); }
 
     function go(page) {
       document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
@@ -476,45 +290,20 @@
       const btn = document.getElementById('loginBtn');
       btn.textContent = '登录中...';
       btn.disabled = true;
-      try {
-        await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-      } catch(e) {
-        showToast('请允许弹窗!');
-        btn.textContent = 'Google 登录';
-        btn.disabled = false;
-      }
+      try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+      catch(e) { showToast('错误', '请允许弹窗!', 'error'); btn.textContent = 'Google 登录'; btn.disabled = false; }
     }
-
     async function logout() { await auth.signOut(); }
 
     auth.onAuthStateChanged(async (u) => {
-      if (!u) {
-        document.getElementById('loginPage').style.display = 'flex';
-        document.getElementById('appPage').style.display = 'none';
-        return;
-      }
-      user = u;
-      isAdmin = u.email === 'jacob.frog.jacob@gmail.com';
-      
+      if (!u) { document.getElementById('loginPage').style.display = 'flex'; document.getElementById('appPage').style.display = 'none'; return; }
+      user = u; isAdmin = u.email === 'jacob.frog.jacob@gmail.com';
       const doc = await db.collection('users').doc(u.uid).get();
-      if (doc.exists) {
-        coins = doc.data().coins || 0;
-        lastDraw = doc.data().lastDraw;
-      } else {
-        await db.collection('users').doc(u.uid).set({
-          email: u.email,
-          displayName: u.displayName,
-          coins: 100,
-          createdAt: new Date()
-        });
-        coins = 100;
-        showToast('新用户赠送100金币!');
-      }
-      
+      if (doc.exists) { coins = doc.data().coins || 0; lastDraw = doc.data().lastDraw; }
+      else { await db.collection('users').doc(u.uid).set({email:u.email, displayName:u.displayName, coins:100, createdAt:new Date()}); coins=100; showToast('恭喜!', '新用户赠送100金币!'); }
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('appPage').style.display = 'block';
-      updateUI();
-      loadData();
+      updateUI(); loadData(); loadUsers();
     });
 
     function updateUI() {
@@ -526,95 +315,60 @@
       document.getElementById('loginBtn').disabled = false;
     }
 
+    async function loadUsers() {
+      if (!isAdmin) return;
+      const snap = await db.collection('users').get();
+      const opts = '<option value="">选择用户...</option>';
+      document.getElementById('userSelect').innerHTML = opts + snap.docs.map(d => `<option value="${d.id}">${d.data().displayName}</option>`).join('');
+      document.getElementById('cardUserSelect').innerHTML = opts + snap.docs.map(d => `<option value="${d.id}">${d.data().displayName}</option>`).join('');
+    }
+
     async function loadData() {
-      const snap = await db.collection('announcements').orderBy('createdAt', 'desc').limit(5).get();
-      document.getElementById('annList').innerHTML = snap.empty ? '<p style="color:#888;">暂无公告</p>' : 
-        snap.docs.map(d => `<div class="ann-item"><b>${d.data().title}</b><p>${d.data().content}</p></div>`).join('');
+      const snap = await db.collection('announcements').orderBy('createdAt','desc').limit(5).get();
+      document.getElementById('annList').innerHTML = snap.empty ? '<p style="color:#888;">暂无公告</p>' : snap.docs.map(d => `<div class="ann-item"><b>${d.data().title}</b><p>${d.data().content}</p></div>`).join('');
       
-      const csnap = await db.collection('userCards').where('uid', '==', user.uid).get();
+      const csnap = await db.collection('userCards').where('uid','==',user.uid).get();
       document.getElementById('cardCount').textContent = `(${csnap.size}张)`;
-      document.getElementById('cardGrid').innerHTML = csnap.empty ? '<p style="grid-column:span 4;color:#888;text-align:center;">暂无卡牌</p>' :
-        csnap.docs.map(d => {
-          const c = d.data();
-          return `<div class="my-card"><img src="cards/${c.cardId}.png"><p class="name rarity-${c.rarity}">${c.rarity}-${c.cardId}</p></div>`;
-        }).join('');
+      document.getElementById('cardGrid').innerHTML = csnap.empty ? '<p style="grid-column:span 4;color:#888;text-align:center;">暂无卡牌</p>' : csnap.docs.map(d => `<div class="my-card"><img src="cards/${d.data().cardId}.png"><p class="name rarity-${d.data().rarity}">${d.data().rarity}-${d.data().cardId}</p></div>`).join('');
       
-      const today = new Date().toLocaleDateString('zh-CN');
-      document.getElementById('freeCount').textContent = (lastDraw === today) ? 0 : 1;
+      document.getElementById('freeCount').textContent = (lastDraw === new Date().toLocaleDateString('zh-CN')) ? 0 : 1;
       
       if (isAdmin) {
-        const ssnap = await db.collection('submissions').where('status', '==', 'pending').get();
+        const ssnap = await db.collection('submissions').where('status','==','pending').get();
         document.getElementById('pendingNum').textContent = `(${ssnap.size})`;
-        document.getElementById('subList').innerHTML = ssnap.empty ? '<p>暂无投稿</p>' :
-          ssnap.docs.map(d => `<div style="border:2px solid #ccc;padding:14px;margin:10px 0;"><b>${d.data().userName}</b><p>${d.data().content}</p><button class="btn-gold" style="margin-right:8px;" onclick="appSub('${d.id}',true)">通过</button><button class="btn-gold" onclick="appSub('${d.id}',false)">拒绝</button></div>`).join('');
+        document.getElementById('subList').innerHTML = ssnap.empty ? '<p>暂无投稿</p>' : ssnap.docs.map(d => `<div style="border:2px solid #ccc;padding:14px;margin:10px 0;"><b>${d.data().userName}</b><p>${d.data().content}</p><button class="btn-gold" style="margin-right:8px;" onclick="appSub('${d.id}',true)">通过</button><button class="btn-gold" onclick="appSub('${d.id}',false)">拒绝</button></div>`).join('');
       }
     }
 
     async function doDraw() {
-      const btn = document.getElementById('drawBtn');
-      btn.disabled = true;
-      
+      const btn = document.getElementById('drawBtn'); btn.disabled = true;
       const today = new Date().toLocaleDateString('zh-CN');
       let free = (lastDraw === today) ? 0 : 1;
+      if (free === 0 && coins < 100) { showToast('提示','金币不足!','error'); btn.disabled = false; return; }
+      if (free > 0) await db.collection('users').doc(user.uid).update({lastDraw:today});
+      else { coins -= 100; await db.collection('users').doc(user.uid).update({coins:coins}); }
       
-      if (free === 0 && coins < 100) {
-        showToast('金币不足!');
-        btn.disabled = false;
-        return;
-      }
-      
-      if (free > 0) {
-        await db.collection('users').doc(user.uid).update({ lastDraw: today });
-      } else {
-        coins -= 100;
-        await db.collection('users').doc(user.uid).update({ coins: coins });
-      }
-      
-      document.getElementById('drawResult').innerHTML = '<div style="font-size:36px;" class="spinner">🔄 旋转中...</div>';
-      
+      document.getElementById('drawResult').innerHTML = '<div style="font-size:36px;">🔄 旋转中...</div>';
       await new Promise(r => setTimeout(r, 1500));
       
       let rand = Math.random() * 100, cum = 0, rar = 'N';
-      for (const [k, v] of Object.entries(RARY)) {
-        cum += v;
-        if (rand <= cum) {
-          rar = k;
-          break;
-        }
-      }
+      for (const [k,v] of Object.entries(RARY)) { cum += v; if (rand <= cum) { rar = k; break; } }
       const pool = CARD_POOL[rar];
       const cardId = pool[Math.floor(Math.random() * pool.length)];
+      await db.collection('userCards').add({uid:user.uid, cardId:cardId, rarity:rar, date:new Date()});
       
-      await db.collection('userCards').add({
-        uid: user.uid,
-        cardId: cardId,
-        rarity: rar,
-        date: new Date()
-      });
-      
-      const rarityName = rar === 'N' ? '普通' : rar === 'R' ? '稀有' : rar === 'SSR' ? '传说' : '隐藏';
-      document.getElementById('drawResult').innerHTML = 
-        `<div class="draw-card"><img src="cards/${cardId}.png"><p class="draw-name rarity-${rar}">#${cardId}</p><p class="rarity-${rar}">${rarityName}</p></div>`;
-      
-      showToast(`获得 ${rarityName} 卡牌!`);
-      updateUI();
-      loadData();
-      btn.disabled = false;
+      const name = rar==='N'?'普通':rar==='R'?'稀有':rar==='SSR'?'传说':'隐藏';
+      document.getElementById('drawResult').innerHTML = `<div class="draw-card"><img src="cards/${cardId}.png"><p class="draw-name rarity-${rar}">#${cardId}</p><p class="rarity-${rar}">${name}</p></div>`;
+      showToast('恭喜!', `获得 ${name} 卡牌!`);
+      updateUI(); loadData(); btn.disabled = false;
     }
 
     async function submitPost() {
       const con = document.getElementById('postInput').value;
       const img = document.getElementById('imgInput').value;
       if (!con) return;
-      await db.collection('submissions').add({
-        userId: user.uid,
-        userName: user.displayName,
-        content: con,
-        imageUrl: img,
-        status: 'pending',
-        createdAt: new Date()
-      });
-      showToast('投稿成功!');
+      await db.collection('submissions').add({userId:user.uid, userName:user.displayName, content:con, imageUrl:img, status:'pending', createdAt:new Date()});
+      showToast('成功!','投稿成功，等待审核!');
       document.getElementById('postInput').value = '';
     }
 
@@ -622,73 +376,41 @@
       const t = document.getElementById('annTitle').value;
       const c = document.getElementById('annContent').value;
       if (!t || !c) return;
-      await db.collection('announcements').add({
-        title: t,
-        content: c,
-        createdAt: new Date()
-      });
-      showToast('公告已发布!');
+      await db.collection('announcements').add({title:t, content:c, createdAt:new Date()});
+      showToast('成功!','公告已发布!');
       document.getElementById('annTitle').value = '';
       document.getElementById('annContent').value = '';
       loadData();
     }
 
     async function appSub(id, ok) {
-      await db.collection('submissions').doc(id).update({
-        status: ok ? 'approved' : 'rejected'
-      });
-      showToast(ok ? '已通过' : '已拒绝');
+      await db.collection('submissions').doc(id).update({status:ok?'approved':'rejected'});
+      showToast('成功!', ok?'已通过':'已拒绝');
       loadData();
     }
 
-    async function buyPack(price) {
-      if (coins < price) {
-        showToast('金币不足!');
-        return;
-      }
-      coins -= price;
-      await db.collection('users').doc(user.uid).update({ coins: coins });
-      showToast('购买成功!');
-      updateUI();
-    }
-
-    async function createComm() {
-      if (coins < 500) {
-        showToast('金币不足!');
-        return;
-      }
-      coins -= 500;
-      await db.collection('users').doc(user.uid).update({ coins: coins });
-      showToast('创建成功!');
-      updateUI();
-    }
-
-    async function sendMsg() {
-      const m = document.getElementById('msgInput').value;
-      if (!m) return;
-      await db.collection('service').add({
-        uid: user.uid,
-        msg: m,
-        createdAt: new Date()
-      });
-      showToast('已发送');
-      document.getElementById('msgInput').value = '';
-    }
+    async function buyPack(price) { if (coins < price) { showToast('提示','金币不足!','error'); return; } coins -= price; await db.collection('users').doc(user.uid).update({coins:coins}); showToast('成功!','购买成功!'); updateUI(); }
+    async function createComm() { if (coins < 500) { showToast('提示','金币不足!','error'); return; } coins -= 500; await db.collection('users').doc(user.uid).update({coins:coins}); showToast('成功!','创建成功!'); updateUI(); }
 
     async function addCoins() {
       if (!isAdmin) return;
-      const uid = document.getElementById('addCoinsUid').value;
+      const uid = document.getElementById('userSelect').value;
       const num = parseInt(document.getElementById('addCoinsNum').value);
-      if (!uid || !num) return;
+      if (!uid || !num) { showToast('提示','请选择用户和数量!','error'); return; }
       const doc = await db.collection('users').doc(uid).get();
-      if (doc.exists) {
-        await db.collection('users').doc(uid).update({
-          coins: doc.data().coins + num
-        });
-        showToast('已发放!');
-      }
-      document.getElementById('addCoinsUid').value = '';
+      if (doc.exists) { await db.collection('users').doc(uid).update({coins:doc.data().coins + num}); showToast('成功!','金币已发放!'); }
       document.getElementById('addCoinsNum').value = '';
+    }
+
+    async function addCard() {
+      if (!isAdmin) return;
+      const uid = document.getElementById('cardUserSelect').value;
+      const rarity = document.getElementById('cardRarity').value;
+      if (!uid) { showToast('提示','请选择用户!','error'); return; }
+      const pool = CARD_POOL[rarity];
+      const cardId = pool[Math.floor(Math.random() * pool.length)];
+      await db.collection('userCards').add({uid:uid, cardId:cardId, rarity:rarity, date:new Date()});
+      showToast('成功!','卡牌已发放!');
     }
   </script>
 </body>
