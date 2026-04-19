@@ -1,172 +1,379 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IG粉絲小程序</title>
+  <title>IG粉丝小程序</title>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
   <style>
-    :root { --red: #8B0000; --gold: #B8860B; --black: #1a1a1a; --paper: #f5f0e4; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Ma Shan Zheng', 'Noto Serif TC', serif; background: var(--paper); color: var(--black); min-height: 100vh; }
+    :root {
+      --red: #9B111E; --gold: #C5A000; --dark: #1a1a1a;
+      --paper: #F5EGD8; --paper-dark: #E8DFC8;
+    }
+    body {
+      font-family: 'ZCOOL XiaoWei', serif;
+      background: var(--paper);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(155,17,30,0.05) 0%, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(197,160,0,0.05) 0%, transparent 50%);
+      color: var(--dark);
+      min-height: 100vh;
+    }
+    button { cursor: pointer; font-family: inherit; }
 
-    /* 登入頁面 */
-    #loginPage { min-height: 100vh; display: none; align-items: center; justify-content: center; flex-direction: column; padding: 20px; }
-    .login-box { background: white; border: 4px solid var(--black); padding: 40px; position: relative; }
-    .login-box::before { content: ''; position: absolute; inset: 6px; border: 1px solid var(--black); pointer-events: none; }
-    .login-box h1 { font-size: 42px; color: var(--red); text-align: center; margin-bottom: 10px; letter-spacing: 4px; }
-    .login-box p { color: #666; text-align: center; margin-bottom: 30px; font-size: 18px; }
-    .login-btn { background: var(--red); color: white; border: 3px solid var(--black); padding: 16px 32px; font-size: 22px; font-family: inherit; display: block; width: 100%; }
+    /* 登录 */
+    #loginPage {
+      min-height: 100vh;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 20px;
+    }
+    .login-card {
+      background: linear-gradient(145deg, #fff 0%, var(--paper) 100%);
+      border: 4px solid var(--dark);
+      padding: 50px 40px;
+      position: relative;
+      box-shadow: 8px 8px 0 var(--dark);
+    }
+    .login-card::before {
+      content: ''; position: absolute; inset: 8px; border: 1px solid var(--dark);
+      pointer-events: none;
+    }
+    .login-card h1 {
+      font-size: 48px; color: var(--red);
+      text-align: center;
+      margin-bottom: 10px;
+      letter-spacing: 8px;
+    }
+    .login-card .subtitle {
+      color: #666;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 18px;
+    }
+    .login-btn {
+      background: var(--red);
+      color: white;
+      border: 3px solid var(--dark);
+      padding: 18px 40px;
+      font-size: 24px;
+      display: block;
+      width: 100%;
+      box-shadow: 4px 4px 0 var(--dark);
+      transition: all 0.1s;
+    }
+    .login-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--dark); }
+    .login-btn:disabled { background: #999; cursor: not-allowed; }
 
     /* 主APP */
     #appPage { display: none; }
-    .app-header { background: var(--red); color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-    .app-header h1 { font-size: 20px; font-weight: normal; letter-spacing: 2px; }
-    .header-right { display: flex; gap: 12px; align-items: center; }
-    .coin-badge { background: var(--gold); color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px; }
+    .app-header {
+      background: var(--red);
+      color: white;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    .app-header h1 { font-size: 22px; letter-spacing: 2px; }
+    .header-right { display: flex; gap: 14px; align-items: center; }
+    .coin-badge {
+      background: var(--gold);
+      color: white;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 15px;
+    }
 
     /* 页面 */
     .page-section { display: none; padding: 16px; }
     .page-section.active { display: block; }
 
     /* 卡片 */
-    .ink-card { background: white; border: 3px solid var(--black); padding: 20px; position: relative; }
-    .ink-card::after { content: ''; position: absolute; inset: 4px; border: 1px solid rgba(0,0,0,0.1); pointer-events: none; }
-    .section-tit { font-size: 24px; color: var(--red); border-bottom: 3px solid var(--red); padding-bottom: 8px; margin-bottom: 16px; }
+    .ink-box {
+      background: #fff;
+      border: 3px solid var(--dark);
+      padding: 24px;
+      margin-bottom: 16px;
+      position: relative;
+      box-shadow: 5px 5px 0 rgba(0,0,0,0.15);
+    }
+    .ink-box::after {
+      content: ''; position: absolute; inset: 5px; border: 1px dashed rgba(0,0,0,0.2);
+      pointer-events: none;
+    }
+    .section-tit {
+      font-size: 26px; color: var(--red);
+      border-bottom: 3px solid var(--red);
+      padding-bottom: 10px;
+      margin-bottom: 18px;
+    }
 
-    /* 功能 */
-    .func-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 16px 0; }
-    .func-item { background: white; border: 2px solid var(--black); padding: 15px 10px; text-align: center; cursor: pointer; }
-    .func-item .icon { font-size: 28px; display: block; margin-bottom: 4px; }
-    .func-item .txt { font-size: 14px; }
+    /* 功能块 */
+    .func-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
+    .func-btn {
+      background: #fff;
+      border: 2px solid var(--dark);
+      padding: 16px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.1s;
+      box-shadow: 3px 3px 0 var(--dark);
+    }
+    .func-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--dark); }
+    .func-btn .icon { font-size: 30px; display: block; margin-bottom: 6px; }
+    .func-btn .txt { font-size: 14px; }
 
-    /* 卡牌 */
+    /* 卡片 */
     .card-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-    .my-card { background: white; border: 2px solid var(--black); padding: 8px; text-align: center; }
+    .my-card {
+      background: #fff;
+      border: 2px solid var(--dark);
+      padding: 8px;
+      text-align: center;
+    }
     .my-card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
-    .my-card .name { font-size: 12px; font-weight: bold; margin-top: 4px; }
-    .rarity-N { color: #6b7280; }
-    .rarity-R { color: #2563eb; }
-    .rarity-SSR { color: #9333ea; }
-    .rarity-LOG { color: #d97706; }
+    .my-card .name { font-size: 11px; font-weight: bold; margin-top: 4px; }
+    .rarity-N { color: #666; }
+    .rarity-R { color: #2563EB; }
+    .rarity-SSR { color: #9333EA; }
+    .rarity-LOG { color: #D97706; }
 
     /* 抽卡 */
-    .draw-box { text-align: center; padding: 30px; }
-    .draw-card { display: inline-block; background: white; border: 4px solid var(--black); padding: 15px; }
-    .draw-card img { width: 80px; height: 80px; object-fit: contain; }
-    .draw-name { font-size: 18px; font-weight: bold; margin-top: 8px; }
+    .draw-result { text-align: center; padding: 40px; }
+    .draw-card {
+      display: inline-block;
+      background: #fff;
+      border: 4px solid var(--dark);
+      padding: 20px;
+      box-shadow: 6px 6px 0 var(--dark);
+    }
+    .draw-card img { width: 90px; height: 90px; object-fit: contain; }
+    .draw-name { font-size: 20px; font-weight: bold; margin-top: 10px; }
 
     /* 按钮 */
-    .btn-primary { background: var(--red); color: white; border: 3px solid var(--black); padding: 14px 24px; font-size: 18px; font-family: inherit; display: block; width: 100%; }
-    .btn-gold { background: var(--gold); color: white; border: 2px solid var(--black); padding: 10px 16px; font-size: 14px; font-family: inherit; }
+    .btn-red {
+      background: var(--red);
+      color: white;
+      border: 3px solid var(--dark);
+      padding: 16px 28px;
+      font-size: 20px;
+      display: block;
+      width: 100%;
+      box-shadow: 4px 4px 0 var(--dark);
+    }
+    .btn-red:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--dark); }
+    .btn-gold {
+      background: var(--gold);
+      color: white;
+      border: 2px solid var(--dark);
+      padding: 12px 18px;
+      font-size: 15px;
+    }
 
     /* 输入 */
-    .input-field { background: var(--paper); border: 2px solid var(--black); padding: 12px; font-size: 16px; font-family: inherit; width: 100%; display: block; margin-bottom: 10px; }
+    .input-field {
+      background: var(--paper);
+      border: 2px solid var(--dark);
+      padding: 14px;
+      font-size: 16px;
+      width: 100%;
+      display: block;
+      margin-bottom: 12px;
+    }
     .input-field:focus { outline: none; border-color: var(--red); }
 
     /* 导航 */
-    .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 3px solid var(--black); display: flex; justify-content: space-around; padding: 10px 0; z-index: 100; }
-    .tab-item { display: flex; flex-direction: column; align-items: center; font-size: 12px; color: #888; cursor: pointer; }
+    .tab-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: #fff;
+      border-top: 3px solid var(--dark);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+      z-index: 100;
+    }
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 12px;
+      color: #888;
+      cursor: pointer;
+    }
     .tab-item.active { color: var(--red); font-weight: bold; }
-    .tab-icon { font-size: 24px; margin-bottom: 2px; }
+    .tab-icon { font-size: 26px; margin-bottom: 3px; }
 
     /* 印章 */
-    .seal-tag { background: var(--red); color: white; padding: 3px 10px; font-size: 12px; display: inline-block; }
+    .seal-tag {
+      background: var(--red);
+      color: white;
+      padding: 4px 12px;
+      font-size: 13px;
+      display: inline-block;
+    }
 
     /* 公告 */
-    .ann-item { border-left: 4px solid var(--red); padding-left: 12px; margin: 12px 0; }
+    .ann-item {
+      border-left: 4px solid var(--red);
+      padding-left: 14px;
+      margin: 14px 0;
+    }
     .ann-item b { font-size: 18px; }
-    .ann-item p { font-size: 14px; color: #666; margin-top: 4px; }
+    .ann-item p { font-size: 14px; color: #666; margin-top: 5px; }
 
     /* 商店 */
-    .shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .shop-item { background: white; border: 2px solid var(--black); padding: 16px; text-align: center; }
-    .shop-item .icon { font-size: 32px; display: block; margin-bottom: 8px; }
+    .shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .shop-item {
+      background: #fff;
+      border: 2px solid var(--dark);
+      padding: 18px;
+      text-align: center;
+    }
+    .shop-item .icon { font-size: 34px; display: block; margin-bottom: 10px; }
     .shop-item .price { color: var(--gold); font-weight: bold; }
 
-    /* 用户 */
-    .user-info { text-align: center; padding: 20px; background: white; border: 3px solid var(--black); margin-bottom: 16px; }
-    .user-info h2 { color: var(--red); font-size: 28px; }
-    .user-info p { font-size: 20px; margin-top: 8px; }
+    /* 用户信息 */
+    .user-card {
+      text-align: center;
+      padding: 24px;
+      background: #fff;
+      border: 3px solid var(--dark);
+      margin-bottom: 18px;
+    }
+    .user-card h2 { color: var(--red); font-size: 30px; }
+    .user-card p { font-size: 22px; margin-top: 10px; }
+
+    /* 加载 */
+    .loading { opacity: 0.6; pointer-events: none; }
+    .spinner { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--dark);
+      color: white;
+      padding: 16px 32px;
+      font-size: 18px;
+      z-index: 1000;
+      display: none;
+    }
+    .toast.show { display: block; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* 新手引导 */
+    .guide-box {
+      background: linear-gradient(135deg, var(--paper) 0%, var(--paper-dark) 100%);
+      border: 3px solid var(--gold);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .guide-box h3 { color: var(--gold); font-size: 20px; margin-bottom: 12px; }
+    .guide-box li { margin: 8px 0; font-size: 16px; }
   </style>
 </head>
 <body>
-  <!-- 登入 -->
+  <!-- 登录 -->
   <div id="loginPage">
-    <div class="login-box">
-      <h1>IG粉絲小程序</h1>
-      <p>書法風格抽卡系統</p>
-      <button class="login-btn" onclick="login()">Google 登入</button>
+    <div class="login-card">
+      <h1>粉丝小程序</h1>
+      <p class="subtitle">书法风格抽卡系统</p>
+      <button class="login-btn" id="loginBtn" onclick="login()">Google 登录</button>
     </div>
   </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
 
   <!-- 主APP -->
   <div id="appPage">
     <div class="app-header">
-      <h1>粉絲小程序</h1>
+      <h1>粉丝小程序</h1>
       <div class="header-right">
         <span class="coin-badge">💰<span id="coins">0</span></span>
-        <button onclick="logout()" style="background:none;border:none;color:white;font-size:14px;cursor:pointer;">登出</button>
+        <button onclick="logout()" style="background:none;border:none;color:white;font-size:14px;cursor:pointer;opacity:0.9;">退出</button>
       </div>
     </div>
 
     <!-- 首页 -->
     <div id="home" class="page-section active">
-      <div class="user-info">
-        <h2>歡迎</h2>
+      <div class="user-card">
+        <h2>欢迎</h2>
         <p id="userName"></p>
-        <span id="adminTag" class="seal-tag" style="display:none;">管理員</span>
+        <span id="adminTag" class="seal-tag" style="display:none;">管理员</span>
       </div>
       
-      <div class="ink-card">
+      <!-- 新手引导 -->
+      <div class="guide-box" id="guideBox">
+        <h3>📖 新手入门</h3>
+        <ul>
+          <li>1. 点击「抽卡」每日可免费抽卡1次</li>
+          <li>2. 抽卡可获得普通/稀有/传说/隐藏卡牌</li>
+          <li>3. 投稿需要管理员审核通过</li>
+          <li>4. 可创建粉丝团与其他玩家互动</li>
+        </ul>
+      </div>
+      
+      <div class="ink-box">
         <h3 class="section-tit">📢 公告</h3>
         <div id="annList"></div>
       </div>
       
       <div class="func-grid">
-        <div class="func-item" onclick="go('cards')"><span class="icon">🎴</span><span class="txt">卡牌</span></div>
-        <div class="func-item" onclick="go('draw')"><span class="icon">🎰</span><span class="txt">抽卡</span></div>
-        <div class="func-item" onclick="go('submit')"><span class="icon">✍️</span><span class="txt">投稿</span></div>
-        <div class="func-item" onclick="go('admin')"><span class="icon">⚙️</span><span class="txt">管理</span></div>
+        <div class="func-btn" onclick="go('cards')"><span class="icon">🎴</span><span class="txt">卡牌</span></div>
+        <div class="func-btn" onclick="go('draw')"><span class="icon">🎰</span><span class="txt">抽卡</span></div>
+        <div class="func-btn" onclick="go('submit')"><span class="icon">✍️</span><span class="txt">投稿</span></div>
+        <div class="func-btn" onclick="go('admin')"><span class="icon">⚙️</span><span class="txt">管理</span></div>
       </div>
     </div>
 
     <!-- 客服 -->
     <div id="service" class="page-section">
-      <div class="ink-card">
+      <div class="ink-box">
         <h3 class="section-tit">📞 客服</h3>
-        <textarea id="msgInput" class="input-field" rows="3" placeholder="輸入訊息..."></textarea>
-        <button class="btn-primary" onclick="sendMsg()">發送訊息</button>
+        <textarea id="msgInput" class="input-field" rows="3" placeholder="输入消息..."></textarea>
+        <button class="btn-red" onclick="sendMsg()">发送消息</button>
       </div>
     </div>
 
     <!-- 社团 -->
     <div id="community" class="page-section">
-      <div class="ink-card">
-        <h3 class="section-tit">👥 粉絲團</h3>
-        <button class="btn-primary" onclick="createComm()">創建粉絲團 (500💰)</button>
+      <div class="ink-box">
+        <h3 class="section-tit">👥 粉丝团</h3>
+        <button class="btn-red" onclick="createComm()">创建粉丝团 (500💰)</button>
       </div>
     </div>
 
     <!-- 商店 -->
     <div id="shop" class="page-section">
-      <div class="ink-card">
+      <div class="ink-box">
         <h3 class="section-tit">🛒 商店</h3>
         <div class="shop-grid">
-          <div class="shop-item"><span class="icon">🎁</span><p class="rarity-N">基礎包</p><button class="btn-gold" onclick="buyPack(100)">100💰</button></div>
+          <div class="shop-item"><span class="icon">🎁</span><p class="rarity-N">基础包</p><button class="btn-gold" onclick="buyPack(100)">100💰</button></div>
           <div class="shop-item"><span class="icon">🎁</span><p class="rarity-R">稀有包</p><button class="btn-gold" onclick="buyPack(300)">300💰</button></div>
-          <div class="shop-item"><span class="icon">🎁</span><p class="rarity-SSR">傳說包</p><button class="btn-gold" onclick="buyPack(1000)">1000💰</button></div>
-          <div class="shop-item"><span class="icon">🎁</span><p class="rarity-LOG">隱藏包</p><button class="btn-gold" onclick="buyPack(5000)">5000💰</button></div>
+          <div class="shop-item"><span class="icon">🎁</span><p class="rarity-SSR">传说包</p><button class="btn-gold" onclick="buyPack(1000)">1000💰</button></div>
+          <div class="shop-item"><span class="icon">🎁</span><p class="rarity-LOG">隐藏包</p><button class="btn-gold" onclick="buyPack(5000)">5000💰</button></div>
         </div>
       </div>
     </div>
 
     <!-- 卡牌 -->
     <div id="cards" class="page-section">
-      <div class="ink-card">
+      <div class="ink-box">
         <h3 class="section-tit">🎴 我的卡牌 <span id="cardCount" style="font-size:16px;color:#666;"></span></h3>
         <div id="cardGrid" class="card-grid"></div>
       </div>
@@ -174,58 +381,58 @@
 
     <!-- 抽卡 -->
     <div id="draw" class="page-section">
-      <div class="ink-card" style="text-align:center;margin-bottom:16px;">
-        <p>今日免費次數</p>
-        <p style="font-size:32px;color:var(--red);" id="freeCount">1</p>
+      <div class="ink-box" style="text-align:center;margin-bottom:16px;">
+        <p>今日免费次数</p>
+        <p style="font-size:34px;color:var(--red);" id="freeCount">1</p>
       </div>
-      <div class="ink-card" style="text-align:center;">
-        <div id="drawResult" class="draw-box"><div style="font-size:48px;">🎰</div></div>
-        <button class="btn-primary" onclick="doDraw()">免費抽卡</button>
+      <div class="ink-box" style="text-align:center;">
+        <div id="drawResult" class="draw-result"><div style="font-size:52px;">🎰</div></div>
+        <button class="btn-red" id="drawBtn" onclick="doDraw()">免费抽卡</button>
       </div>
-      <div class="ink-card" style="margin-top:16px;">
+      <div class="ink-box" style="margin-top:16px;">
         <div class="card-grid" style="text-align:center;">
-          <div><span class="rarity-N" style="font-size:20px;">普通</span><br><small>60%</small></div>
-          <div><span class="rarity-R" style="font-size:20px;">稀有</span><br><small>25%</small></div>
-          <div><span class="rarity-SSR" style="font-size:20px;">傳說</span><br><small>12%</small></div>
-          <div><span class="rarity-LOG" style="font-size:20px;">隱藏</span><br><small>3%</small></div>
+          <div><span class="rarity-N" style="font-size:22px;">普通</span><br><small>60%</small></div>
+          <div><span class="rarity-R" style="font-size:22px;">稀有</span><br><small>25%</small></div>
+          <div><span class="rarity-SSR" style="font-size:22px;">传说</span><br><small>12%</small></div>
+          <div><span class="rarity-LOG" style="font-size:22px;">隐藏</span><br><small>3%</small></div>
         </div>
       </div>
     </div>
 
     <!-- 投稿 -->
     <div id="submit" class="page-section">
-      <div class="ink-card">
+      <div class="ink-box">
         <h3 class="section-tit">✍️ 投稿</h3>
-        <textarea id="postInput" class="input-field" rows="4" placeholder="輸入內容..."></textarea>
-        <input id="imgInput" class="input-field" placeholder="圖片網址">
-        <button class="btn-primary" onclick="submitPost()">提交投稿</button>
+        <textarea id="postInput" class="input-field" rows="4" placeholder="输入内容..."></textarea>
+        <input id="imgInput" class="input-field" placeholder="图片网址">
+        <button class="btn-red" onclick="submitPost()">提交投稿</button>
       </div>
     </div>
 
     <!-- 管理 -->
     <div id="admin" class="page-section">
-      <div class="ink-card">
+      <div class="ink-box">
         <h3 class="section-tit">⚙️ 管理面板</h3>
         
-        <h4 style="margin:16px 0 8px;">📢 發布公告</h4>
-        <input id="annTitle" class="input-field" placeholder="標題">
-        <textarea id="annContent" class="input-field" rows="2" placeholder="內容"></textarea>
-        <button class="btn-primary" onclick="postAnn()">發布公告</button>
+        <h4 style="margin:18px 0 10px;">📢 发布公告</h4>
+        <input id="annTitle" class="input-field" placeholder="标题">
+        <textarea id="annContent" class="input-field" rows="2" placeholder="内容"></textarea>
+        <button class="btn-red" onclick="postAnn()">发布公告</button>
         
-        <h4 style="margin:24px 0 8px;">📝 投稿審核 <span id="pendingNum" style="color:var(--red);">(0)</span></h4>
+        <h4 style="margin:26px 0 10px;">📝 投稿审核 <span id="pendingNum" style="color:var(--red);">(0)</span></h4>
         <div id="subList"></div>
         
-        <h4 style="margin:24px 0 8px;">💰 發放金幣</h4>
-        <input id="addCoinsUid" class="input-field" placeholder="用戶ID">
-        <input id="addCoinsNum" class="input-field" type="number" placeholder="數量">
-        <button class="btn-primary" onclick="addCoins()">發放金幣</button>
+        <h4 style="margin:26px 0 10px;">💰 发放金币</h4>
+        <input id="addCoinsUid" class="input-field" placeholder="用户ID">
+        <input id="addCoinsNum" class="input-field" type="number" placeholder="数量">
+        <button class="btn-red" onclick="addCoins()">发放金币</button>
       </div>
     </div>
 
     <nav class="tab-bar">
-      <div class="tab-item active" onclick="go('home')"><span class="tab-icon">🏠</span><span>首頁</span></div>
+      <div class="tab-item active" onclick="go('home')"><span class="tab-icon">🏠</span><span>首页</span></div>
       <div class="tab-item" onclick="go('service')"><span class="tab-icon">📞</span><span>客服</span></div>
-      <div class="tab-item" onclick="go('community')"><span class="tab-icon">👥</span><span>社團</span></div>
+      <div class="tab-item" onclick="go('community')"><span class="tab-icon">👥</span><span>社团</span></div>
       <div class="tab-item" onclick="go('shop')"><span class="tab-icon">🛒</span><span>商店</span></div>
     </nav>
   </div>
@@ -245,110 +452,228 @@
     const db = firebase.firestore();
 
     let user = null, coins = 0, isAdmin = false, lastDraw = null;
-
-    // 卡牌图片ID (每稀有度8张，共32种)
-    const CARD_POOL = { N:[1,2,3,4,5,6,7,8], R:[1,2,3,4,5,6,7,8], SSR:[1,2,3,4,5,6,7,8], LOG:[1,2,3,4,5,6,7,8] };
+    const CARD_POOL = { N:[1,2], R:[3,4], SSR:[5,6], LOG:[7,8] };
     const RARY = {N:60,R:25,SSR:12,LOG:3};
 
+    function showToast(msg, duration = 2000) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), duration);
+    }
+
     function go(page) {
-      document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
+      document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
       document.getElementById(page).classList.add('active');
-      document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
-      event.target.closest('.tab-item')?.classList.add('active');
+      document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+      if (event && event.target) {
+        const tab = event.target.closest('.tab-item');
+        if (tab) tab.classList.add('active');
+      }
     }
 
     async function login() {
-      try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
-      catch(e) { alert('請允許彈出視窗！'); }
+      const btn = document.getElementById('loginBtn');
+      btn.textContent = '登录中...';
+      btn.disabled = true;
+      try {
+        await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+      } catch(e) {
+        showToast('请允许弹窗!');
+        btn.textContent = 'Google 登录';
+        btn.disabled = false;
+      }
     }
+
     async function logout() { await auth.signOut(); }
 
     auth.onAuthStateChanged(async (u) => {
-      if (!u) { document.getElementById('loginPage').style.display = 'flex'; document.getElementById('appPage').style.display = 'none'; return; }
-      user = u; isAdmin = u.email === 'jacob.frog.jacob@gmail.com';
+      if (!u) {
+        document.getElementById('loginPage').style.display = 'flex';
+        document.getElementById('appPage').style.display = 'none';
+        return;
+      }
+      user = u;
+      isAdmin = u.email === 'jacob.frog.jacob@gmail.com';
+      
       const doc = await db.collection('users').doc(u.uid).get();
-      if (doc.exists) { coins = doc.data().coins||0; lastDraw = doc.data().lastDraw; }
-      else { await db.collection('users').doc(u.uid).set({email:u.email,displayName:u.displayName,coins:0,createdAt:new Date()}); coins=0; }
+      if (doc.exists) {
+        coins = doc.data().coins || 0;
+        lastDraw = doc.data().lastDraw;
+      } else {
+        await db.collection('users').doc(u.uid).set({
+          email: u.email,
+          displayName: u.displayName,
+          coins: 100,
+          createdAt: new Date()
+        });
+        coins = 100;
+        showToast('新用户赠送100金币!');
+      }
+      
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('appPage').style.display = 'block';
-      updateUI(); loadData();
+      updateUI();
+      loadData();
     });
 
     function updateUI() {
       document.getElementById('coins').textContent = coins;
-      document.getElementById('userName').textContent = user?.displayName;
+      document.getElementById('userName').textContent = user?.displayName || '';
       document.getElementById('adminTag').style.display = isAdmin ? 'inline-block' : 'none';
       document.getElementById('admin').style.display = isAdmin ? 'block' : 'none';
+      document.getElementById('loginBtn').textContent = 'Google 登录';
+      document.getElementById('loginBtn').disabled = false;
     }
 
     async function loadData() {
-      const snap = await db.collection('announcements').orderBy('createdAt','desc').limit(5).get();
-      document.getElementById('annList').innerHTML = snap.empty ? '<p style="color:#888;">無公告</p>' : 
-        snap.docs.map(d=>`<div class="ann-item"><b>${d.data().title}</b><p>${d.data().content}</p></div>`).join('');
+      const snap = await db.collection('announcements').orderBy('createdAt', 'desc').limit(5).get();
+      document.getElementById('annList').innerHTML = snap.empty ? '<p style="color:#888;">暂无公告</p>' : 
+        snap.docs.map(d => `<div class="ann-item"><b>${d.data().title}</b><p>${d.data().content}</p></div>`).join('');
       
-      const csnap = await db.collection('userCards').where('uid','==',user.uid).get();
-      document.getElementById('cardCount').textContent = `(${csnap.size}張)`;
-      document.getElementById('cardGrid').innerHTML = csnap.empty ? '<p style="grid-column:span 4;color:#888;text-align:center;">尚無卡牌</p>' :
-        csnap.docs.map(d=>{
+      const csnap = await db.collection('userCards').where('uid', '==', user.uid).get();
+      document.getElementById('cardCount').textContent = `(${csnap.size}张)`;
+      document.getElementById('cardGrid').innerHTML = csnap.empty ? '<p style="grid-column:span 4;color:#888;text-align:center;">暂无卡牌</p>' :
+        csnap.docs.map(d => {
           const c = d.data();
           return `<div class="my-card"><img src="cards/${c.cardId}.png"><p class="name rarity-${c.rarity}">${c.rarity}-${c.cardId}</p></div>`;
         }).join('');
       
-      const today = new Date().toLocaleDateString('zh-TW');
-      document.getElementById('freeCount').textContent = (lastDraw===today) ? 0 : 1;
+      const today = new Date().toLocaleDateString('zh-CN');
+      document.getElementById('freeCount').textContent = (lastDraw === today) ? 0 : 1;
       
       if (isAdmin) {
-        const ssnap = await db.collection('submissions').where('status','==','pending').get();
+        const ssnap = await db.collection('submissions').where('status', '==', 'pending').get();
         document.getElementById('pendingNum').textContent = `(${ssnap.size})`;
-        document.getElementById('subList').innerHTML = ssnap.empty ? '<p>無投稿</p>' :
-          ssnap.docs.map(d=>`<div style="border:2px solid #ccc;padding:12px;margin:8px 0;"><b>${d.data().userName}</b><p>${d.data().content}</p><button class="btn-gold" onclick="appSub('${d.id}',true)">通過</button> <button class="btn-gold" onclick="appSub('${d.id}',false)">拒絕</button></div>`).join('');
+        document.getElementById('subList').innerHTML = ssnap.empty ? '<p>暂无投稿</p>' :
+          ssnap.docs.map(d => `<div style="border:2px solid #ccc;padding:14px;margin:10px 0;"><b>${d.data().userName}</b><p>${d.data().content}</p><button class="btn-gold" style="margin-right:8px;" onclick="appSub('${d.id}',true)">通过</button><button class="btn-gold" onclick="appSub('${d.id}',false)">拒绝</button></div>`).join('');
       }
     }
 
     async function doDraw() {
-      const today = new Date().toLocaleDateString('zh-TW');
-      let free = (lastDraw===today)?0:1;
-      if (free===0 && coins<100) { alert('金幣不足'); return; }
-      if (free>0) await db.collection('users').doc(user.uid).update({lastDraw:today});
-      else { coins-=100; await db.collection('users').doc(user.uid).update({coins:coins}); }
+      const btn = document.getElementById('drawBtn');
+      btn.disabled = true;
       
-      document.getElementById('drawResult').innerHTML = '<div style="font-size:32px;">🔄 旋轉中...</div>';
-      await new Promise(r=>setTimeout(r,1500));
+      const today = new Date().toLocaleDateString('zh-CN');
+      let free = (lastDraw === today) ? 0 : 1;
       
-      let rand=Math.random()*100, cum=0, rar='N';
-      for (const [k,v] of Object.entries(RARY)) { cum+=v; if (rand<=cum) {rar=k; break;} }
+      if (free === 0 && coins < 100) {
+        showToast('金币不足!');
+        btn.disabled = false;
+        return;
+      }
+      
+      if (free > 0) {
+        await db.collection('users').doc(user.uid).update({ lastDraw: today });
+      } else {
+        coins -= 100;
+        await db.collection('users').doc(user.uid).update({ coins: coins });
+      }
+      
+      document.getElementById('drawResult').innerHTML = '<div style="font-size:36px;" class="spinner">🔄 旋转中...</div>';
+      
+      await new Promise(r => setTimeout(r, 1500));
+      
+      let rand = Math.random() * 100, cum = 0, rar = 'N';
+      for (const [k, v] of Object.entries(RARY)) {
+        cum += v;
+        if (rand <= cum) {
+          rar = k;
+          break;
+        }
+      }
       const pool = CARD_POOL[rar];
-      const cardId = pool[Math.floor(Math.random()*pool.length)];
-      await db.collection('userCards').add({uid:user.uid, cardId:cardId, rarity:rar, date:new Date()});
+      const cardId = pool[Math.floor(Math.random() * pool.length)];
       
-      document.getElementById('drawResult').innerHTML = `<div class="draw-card"><img src="cards/${cardId}.png"><p class="draw-name rarity-${rar}">#${cardId}</p><p class="rarity-${rar}">${rar==='N'?'普通':rar==='R'?'稀有':rar==='SSR'?'傳說':'隱藏'}</p></div>`;
-      updateUI(); loadData();
+      await db.collection('userCards').add({
+        uid: user.uid,
+        cardId: cardId,
+        rarity: rar,
+        date: new Date()
+      });
+      
+      const rarityName = rar === 'N' ? '普通' : rar === 'R' ? '稀有' : rar === 'SSR' ? '传说' : '隐藏';
+      document.getElementById('drawResult').innerHTML = 
+        `<div class="draw-card"><img src="cards/${cardId}.png"><p class="draw-name rarity-${rar}">#${cardId}</p><p class="rarity-${rar}">${rarityName}</p></div>`;
+      
+      showToast(`获得 ${rarityName} 卡牌!`);
+      updateUI();
+      loadData();
+      btn.disabled = false;
     }
 
     async function submitPost() {
       const con = document.getElementById('postInput').value;
       const img = document.getElementById('imgInput').value;
       if (!con) return;
-      await db.collection('submissions').add({userId:user.uid,userName:user.displayName,content:con,imageUrl:img,status:'pending',createdAt:new Date()});
-      alert('投稿成功');
+      await db.collection('submissions').add({
+        userId: user.uid,
+        userName: user.displayName,
+        content: con,
+        imageUrl: img,
+        status: 'pending',
+        createdAt: new Date()
+      });
+      showToast('投稿成功!');
       document.getElementById('postInput').value = '';
     }
 
     async function postAnn() {
       const t = document.getElementById('annTitle').value;
       const c = document.getElementById('annContent').value;
-      if (!t||!c) return;
-      await db.collection('announcements').add({title:t,content:c,createdAt:new Date()});
+      if (!t || !c) return;
+      await db.collection('announcements').add({
+        title: t,
+        content: c,
+        createdAt: new Date()
+      });
+      showToast('公告已发布!');
       document.getElementById('annTitle').value = '';
       document.getElementById('annContent').value = '';
       loadData();
     }
 
-    async function appSub(id, ok) { await db.collection('submissions').doc(id).update({status:ok?'approved':'rejected'}); loadData(); }
+    async function appSub(id, ok) {
+      await db.collection('submissions').doc(id).update({
+        status: ok ? 'approved' : 'rejected'
+      });
+      showToast(ok ? '已通过' : '已拒绝');
+      loadData();
+    }
 
-    async function buyPack(price) { if (coins<price) { alert('不足'); return; } coins-=price; await db.collection('users').doc(user.uid).update({coins:coins}); alert('成功'); updateUI(); }
-    async function createComm() { if (coins<500) { alert('不足'); return; } coins-=500; await db.collection('users').doc(user.uid).update({coins:coins}); alert('成功'); updateUI(); }
-    async function sendMsg() { const m = document.getElementById('msgInput').value; if (!m) return; await db.collection('service').add({uid:user.uid,msg:m,createdAt:new Date()}); document.getElementById('msgInput').value = ''; alert('已發送'); }
+    async function buyPack(price) {
+      if (coins < price) {
+        showToast('金币不足!');
+        return;
+      }
+      coins -= price;
+      await db.collection('users').doc(user.uid).update({ coins: coins });
+      showToast('购买成功!');
+      updateUI();
+    }
+
+    async function createComm() {
+      if (coins < 500) {
+        showToast('金币不足!');
+        return;
+      }
+      coins -= 500;
+      await db.collection('users').doc(user.uid).update({ coins: coins });
+      showToast('创建成功!');
+      updateUI();
+    }
+
+    async function sendMsg() {
+      const m = document.getElementById('msgInput').value;
+      if (!m) return;
+      await db.collection('service').add({
+        uid: user.uid,
+        msg: m,
+        createdAt: new Date()
+      });
+      showToast('已发送');
+      document.getElementById('msgInput').value = '';
+    }
 
     async function addCoins() {
       if (!isAdmin) return;
@@ -356,7 +681,12 @@
       const num = parseInt(document.getElementById('addCoinsNum').value);
       if (!uid || !num) return;
       const doc = await db.collection('users').doc(uid).get();
-      if (doc.exists) { await db.collection('users').doc(uid).update({coins:doc.data().coins+num}); alert('已發放'); }
+      if (doc.exists) {
+        await db.collection('users').doc(uid).update({
+          coins: doc.data().coins + num
+        });
+        showToast('已发放!');
+      }
       document.getElementById('addCoinsUid').value = '';
       document.getElementById('addCoinsNum').value = '';
     }
