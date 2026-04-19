@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --chinese-red: #8B0000;
+  --ink-black: #1a1a1a;
+  --paper: #f5f0e6;
+  --gold: #D4AF37;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Ma Shan Zheng', cursive, sans-serif;
+  background-color: var(--paper);
+  color: var(--ink-black);
+}
+
+/* 書法風格裝飾 */
+.calligraphy-border {
+  border: 3px solid var(--ink-black);
+  position: relative;
+}
+
+.calligraphy-border::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid var(--ink-black);
+  pointer-events: none;
+}
+
+/* 紅色印章風格 */
+.seal {
+  background: var(--chinese-red);
+  color: white;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+/* 卡片稀有度顏色 */
+.rarity-N { color: #6b7280; }
+.rarity-R { color: #3b82f6; }
+.rarity-SSR { color: #a855f7; }
+.rarity-LOG { color: #f59e0b; }
+
+/* 按鈕書法風格 */
+.btn-calligraphy {
+  background: var(--chinese-red);
+  color: white;
+  padding: 12px 24px;
+  border: 2px solid var(--ink-black);
+  font-size: 18px;
+  transition: all 0.3s ease;
+}
+
+.btn-calligraphy:hover {
+  background: var(--ink-black);
+  color: white;
+}
+
+/* 輸入框書法風格 */
+.input-calligraphy {
+  background: var(--paper);
+  border: 2px solid var(--ink-black);
+  padding: 12px;
+  font-size: 16px;
+}
+
+.input-calligraphy:focus {
+  outline: none;
+  border-color: var(--chinese-red);
+}
